@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Ошибка при регистрации", Toast.LENGTH_SHORT).show();
         }
     }
-
+    // check
     @Override
     protected void onDestroy() {
         dbHelper.close();
