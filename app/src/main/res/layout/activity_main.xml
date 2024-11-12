@@ -17,11 +17,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp"/>
+        android:layout_marginTop="200dp"/>
 
     <EditText
         android:id="@+id/usernameEditText"
-        android:layout_width="0dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:hint="Имя пользователя"
@@ -33,7 +33,7 @@
 
     <EditText
         android:id="@+id/emailEditText"
-        android:layout_width="0dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Электронная почта"
@@ -45,7 +45,7 @@
 
     <EditText
         android:id="@+id/passwordEditText"
-        android:layout_width="0dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Пароль"
@@ -57,7 +57,7 @@
 
     <Button
         android:id="@+id/registerButton"
-        android:layout_width="0dp"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
         android:text="Зарегистрироваться"
         app:layout_constraintTop_toBottomOf="@id/passwordEditText"
@@ -66,7 +66,7 @@
         android:layout_marginTop="32dp"/>
     <Button
         android:id="@+id/logButton"
-        android:layout_width="0dp"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
         android:text="Уже есть аккаунт?"
         app:layout_constraintTop_toBottomOf="@id/registerButton"

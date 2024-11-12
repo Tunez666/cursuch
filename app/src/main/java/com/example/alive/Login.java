@@ -87,8 +87,8 @@ public class Login extends AppCompatActivity {
             String storedPassword = cursor.getString(passwordIndex);
             if (password.equals(storedPassword)) {
                 Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
-                // После успешного входа переходим на главный экран
-                Intent intent = new Intent(Login.this, MainActivity.class);
+                // После успешного входа переходим на страницу со списком пользователей
+                Intent intent = new Intent(Login.this, user_list.class);
                 startActivity(intent);
                 finish(); // Закрываем активность входа
             } else {
