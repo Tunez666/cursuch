@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".glavnay">
+
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Главная"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="200dp"
+        android:layout_marginLeft="150dp"/>
+
+    <TextView
+        android:id="@+id/sub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Мои встречи"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="150dp"/>
+
+    <Button
+        android:id="@+id/add"
+        android:layout_width="100dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="150dp"
+        android:minHeight="32dp"
+        android:text="+"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/deug"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="d"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="150dp" />
+</LinearLayout>

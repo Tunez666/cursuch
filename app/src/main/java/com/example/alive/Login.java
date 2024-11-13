@@ -88,7 +88,7 @@ public class Login extends AppCompatActivity {
             if (password.equals(storedPassword)) {
                 Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
                 // После успешного входа переходим на страницу со списком пользователей
-                Intent intent = new Intent(Login.this, user_list.class);
+                Intent intent = new Intent(Login.this, glavnay.class);
                 startActivity(intent);
                 finish(); // Закрываем активность входа
             } else {
