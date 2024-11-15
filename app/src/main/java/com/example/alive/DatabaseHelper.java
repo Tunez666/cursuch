@@ -1,13 +1,15 @@
 package com.example.alive;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "UserDatabase.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;  // Увеличиваем версию базы данных для обновления
 
     public static final String TABLE_USERS = "users";
     public static final String COLUMN_ID = "_id";
@@ -21,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_PLACE = "place";
-    public static final String COLUMN_DECS = "desc";
+    public static final String COLUMN_DECS = "descr";
 
     private static final String DATABASE_CREATE = "create table "
             + TABLE_USERS + "(" + COLUMN_ID
@@ -45,8 +47,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(DATABASE_CREATE);
-        database.execSQL(DATABASE_CREATE_M);
+        try {
+            database.execSQL(DATABASE_CREATE);
+            database.execSQL(DATABASE_CREATE_M);
+            Log.i("DatabaseInfo", "Tables created successfully");
+        } catch (Exception e) {
+            Log.e("DatabaseError", "Error creating tables: " + e.getMessage());
+        }
     }
 
     @Override
@@ -54,5 +61,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET);
         onCreate(db);
+    }
+
+    // Метод для проверки существования таблицы "meet"
+    public boolean isMeetTableExists() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + TABLE_MEET + "'", null);
+        boolean tableExists = cursor.getCount() > 0;
+        cursor.close();
+        if (tableExists) {
+            Log.d("DatabaseCheck", "Таблица 'meet' найдена");
+        } else {
+            Log.e("DatabaseCheck", "Таблица 'meet' не существует");
+        }
+        return tableExists;
     }
 }

@@ -27,14 +27,7 @@ public class glavnay extends AppCompatActivity {
             debug_m = findViewById(R.id.d_m);
             addb=findViewById(R.id.add);
 
-        debug_m.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Переход на страницу входа
-                Intent intent = new Intent(glavnay.this, MeetingsListActivity.class);
-                startActivity(intent);
-            }
-            });
+
 
             addb.setOnClickListener(new View.OnClickListener() {
                 @Override
