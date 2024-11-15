@@ -13,6 +13,18 @@
         android:theme="@style/Theme.Alive"
         tools:targetApi="31">
         <activity
+            android:name=".MeetingsListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".meet_list"
+            android:exported="false" />
+        <activity
+            android:name=".meetAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".create_m"
+            android:exported="false" />
+        <activity
             android:name=".glavnay"
             android:exported="false" />
         <activity
