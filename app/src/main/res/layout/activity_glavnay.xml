@@ -1,55 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".glavnay">
+    android:padding="16dp"
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="150dp"
-        android:layout_marginTop="200dp"
+        android:layout_gravity="center"
         android:text="Главная"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:paddingBottom="16dp" />
 
     <TextView
         android:id="@+id/sub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="125dp"
-        android:layout_marginTop="30dp"
+        android:layout_gravity="center"
         android:text="Мои встречи"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:textSize="20sp"
+        android:textColor="#555555"
+        android:paddingBottom="24dp" />
 
     <Button
         android:id="@+id/add"
-        android:layout_width="100dp"
-        android:layout_height="45dp"
-        android:layout_marginLeft="150dp"
-        android:layout_marginTop="30dp"
-        android:minHeight="32dp"
-        android:text="+"
-        tools:ignore="MissingConstraints" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Создать встречу"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:backgroundTint="@color/teal_200"
+        android:textColor="@android:color/white" />
 
     <Button
         android:id="@+id/deug"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="165dp"
-        android:layout_marginTop="30dp"
-        android:text="u" />
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:text="Список пользователей"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:backgroundTint="@color/purple_200"
+        android:textColor="@android:color/white" />
+
     <Button
         android:id="@+id/d_m"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="165dp"
-        android:layout_marginTop="30dp"
-        android:text="m" />
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:text="Список встреч"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:backgroundTint="@color/blue"
+        android:textColor="@android:color/white" />
+
+         <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выход"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/red"
+        android:textColor="@android:color/white" />
+
 </LinearLayout>

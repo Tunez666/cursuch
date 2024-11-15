@@ -3,22 +3,22 @@ package com.example.alive;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
 
 public class user_list extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
-    private ListView userListView;
+    private TextView usersListTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
-        userListView = findViewById(R.id.userListView);
+        usersListTextView = findViewById(R.id.usersList);
         dbHelper = new DatabaseHelper(this);
 
         displayUsers();
@@ -26,31 +26,33 @@ public class user_list extends AppCompatActivity {
 
     private void displayUsers() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
+
+        // Запрос данных пользователей
+        String[] columns = {
+                DatabaseHelper.COLUMN_ID,
                 DatabaseHelper.COLUMN_USERNAME,
                 DatabaseHelper.COLUMN_EMAIL
         };
+        Cursor cursor = db.query(DatabaseHelper.TABLE_USERS, columns, null, null, null, null, DatabaseHelper.COLUMN_ID + " ASC");
 
-        Cursor cursor = db.query(
-                DatabaseHelper.TABLE_USERS,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+        if (cursor != null && cursor.getCount() > 0) {
+            StringBuilder users = new StringBuilder();
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
+                String username = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USERNAME));
+                String email = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EMAIL));
 
-        ArrayList<String> userList = new ArrayList<>();
-        while (cursor.moveToNext()) {
-            String username = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USERNAME));
-            String email = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_EMAIL));
-            userList.add(username + " - " + email);
+                users.append("👤 ID: ").append(id)
+                        .append("\nИмя: ").append(username)
+                        .append("\nEmail: ").append(email)
+                        .append("\n\n-------------------\n\n");
+            }
+            usersListTextView.setText(users.toString());
+            cursor.close();
+        } else {
+            usersListTextView.setText("Нет зарегистрированных пользователей.");
+            Toast.makeText(this, "Список пользователей пуст", Toast.LENGTH_SHORT).show();
         }
-        cursor.close();
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, userList);
-        userListView.setAdapter(adapter);
     }
 
     @Override

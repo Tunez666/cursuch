@@ -1,6 +1,7 @@
 package com.example.alive;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -33,6 +34,18 @@ public class Login extends AppCompatActivity {
 
         // Инициализация helper'а базы данных
         dbHelper = new DatabaseHelper(this);
+
+        // Проверяем, сохранён ли текущий пользователь
+        SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String savedEmail = preferences.getString("email", null);
+
+        if (savedEmail != null) {
+            // Пользователь уже авторизован, переходим на главную
+            Toast.makeText(this, "Добро пожаловать обратно!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Login.this, glavnay.class);
+            startActivity(intent);
+            finish();
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,10 +100,17 @@ public class Login extends AppCompatActivity {
             String storedPassword = cursor.getString(passwordIndex);
             if (password.equals(storedPassword)) {
                 Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
-                // После успешного входа переходим на страницу со списком пользователей
+
+                // Сохраняем данные пользователя
+                SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("email", email);
+                editor.apply();
+
+                // Переходим на главную страницу
                 Intent intent = new Intent(Login.this, glavnay.class);
                 startActivity(intent);
-                finish(); // Закрываем активность входа
+                finish();
             } else {
                 Toast.makeText(this, "Неверный пароль", Toast.LENGTH_SHORT).show();
             }
