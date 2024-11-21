@@ -1,5 +1,6 @@
 package com.example.alive;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.EdgeToEdge;
 
@@ -17,9 +19,10 @@ public class Login extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;
-    private TextView registerLinkTextView;
+    private TextView registerB; // Исправлено на TextView
     private DatabaseHelper dbHelper;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +33,7 @@ public class Login extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
-        registerLinkTextView = findViewById(R.id.registerLinkTextView);
+        registerB = findViewById(R.id.registerB);
 
         // Инициализация helper'а базы данных
         dbHelper = new DatabaseHelper(this);
@@ -40,28 +43,17 @@ public class Login extends AppCompatActivity {
         String savedEmail = preferences.getString("email", null);
 
         if (savedEmail != null) {
-            // Пользователь уже авторизован, переходим на главную
             Toast.makeText(this, "Добро пожаловать обратно!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Login.this, glavnay.class);
             startActivity(intent);
             finish();
         }
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser();
-            }
-        });
+        loginButton.setOnClickListener(v -> loginUser());
 
-        registerLinkTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Переход на страницу регистрации
-                Intent intent = new Intent(Login.this, MainActivity.class);
-                startActivity(intent);
-                finish(); // Закрываем активность входа
-            }
+        registerB.setOnClickListener(v -> {
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -69,13 +61,11 @@ public class Login extends AppCompatActivity {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
-        // Простая валидация
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Проверка учетных данных
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String[] projection = {
                 DatabaseHelper.COLUMN_ID,
@@ -96,18 +86,15 @@ public class Login extends AppCompatActivity {
         );
 
         if (cursor.moveToFirst()) {
-            int passwordIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_PASSWORD);
-            String storedPassword = cursor.getString(passwordIndex);
+            String storedPassword = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PASSWORD));
             if (password.equals(storedPassword)) {
                 Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
 
-                // Сохраняем данные пользователя
                 SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("email", email);
                 editor.apply();
 
-                // Переходим на главную страницу
                 Intent intent = new Intent(Login.this, glavnay.class);
                 startActivity(intent);
                 finish();
