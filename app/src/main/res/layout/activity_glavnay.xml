@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@android:color/white">
+    android:background="@drawable/fox_gradient_background"
+    android:padding="16dp">
 
+    <!-- Заголовок -->
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
@@ -15,9 +15,10 @@
         android:text="Главная"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="#000000"
-        android:paddingBottom="16dp" />
+        android:textColor="@color/fox_dark_orange"
+        android:paddingBottom="8dp" />
 
+    <!-- Подзаголовок -->
     <TextView
         android:id="@+id/sub"
         android:layout_width="wrap_content"
@@ -25,31 +26,54 @@
         android:layout_gravity="center"
         android:text="Мои встречи"
         android:textSize="20sp"
-        android:textColor="#555555"
+        android:textColor="@color/fox_light_orange"
         android:paddingBottom="24dp" />
 
+    <!-- Разделитель -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/fox_light_orange"
+        android:alpha="0.5"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Кнопка: Создать встречу -->
     <Button
         android:id="@+id/add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/fox_orange"
         android:text="Создать встречу"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:backgroundTint="@color/teal_200"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:padding="12dp" />
 
+    <!-- Кнопка: Личный кабинет -->
     <Button
         android:id="@+id/openLkButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/fox_orange"
+        android:text="Личный кабинет"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:padding="12dp" />
+
+    <!-- Пространство для центрирования элементов -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Подпись -->
+    <TextView
+        android:id="@+id/footerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:text="Личный кабинет"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:backgroundTint="@color/purple_200"
-        android:textColor="@android:color/white" />
-
+        android:text="Добро пожаловать в приложение!"
+        android:textSize="14sp"
+        android:textColor="@color/fox_light_orange"
+        android:paddingTop="16dp" />
 </LinearLayout>
-

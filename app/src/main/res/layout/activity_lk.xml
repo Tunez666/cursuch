@@ -1,97 +1,126 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/fox_gradient_background"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@android:color/white">
+    tools:context=".lk">
 
-  <TextView
-      android:id="@+id/titleTextView"
-      android:layout_width="wrap_content"
+  <LinearLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:text="Личный кабинет"
-      android:textSize="32sp"
-      android:textStyle="bold"
-      android:textColor="#000000"
-      android:paddingBottom="24dp" />
+      android:orientation="horizontal"
+      android:padding="16dp"
+      android:gravity="center_vertical">
 
-  <de.hdodenhof.circleimageview.CircleImageView
-      android:id="@+id/profileImageView"
-      android:layout_width="120dp"
-      android:layout_height="120dp"
-      android:layout_gravity="center"
-      android:src="@drawable/default_avatar"
-      android:layout_marginBottom="16dp"
-      tools:ignore="MissingClass" />
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profileImageView"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/default_avatar"
+        app:civ_border_color="@color/fox_dark_orange"
+        app:civ_border_width="2dp" />
+
+    <TextView
+        android:id="@+id/userNameTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:text="Имя пользователя"
+        android:textColor="@color/fox_dark_orange"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:id="@+id/editProfileButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_edit"
+        android:contentDescription="Редактировать профиль"
+        app:tint="@color/fox_dark_orange" />
+
+  </LinearLayout>
+
+  <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="@color/fox_light_orange"
+      android:alpha="0.3"/>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:padding="16dp">
+
+    <Button
+        android:id="@+id/addFriendButton"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Добавить друга"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/viewFriendsButton"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Просмотреть друзей"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/deug"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Список пользователей"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/d_m"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Отладка встреч"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"/>
+
+  </LinearLayout>
+
+  <View
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_weight="1" />
 
   <Button
       android:id="@+id/changeAvatarButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
+      android:layout_width="match_parent"
+      android:layout_height="40dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginBottom="8dp"
       android:text="Изменить аватар"
-      android:layout_marginBottom="24dp"/>
-
-  <Button
-      android:id="@+id/deug"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:text="Список пользователей"
-      android:textSize="18sp"
-      android:padding="12dp"
-      android:backgroundTint="@color/purple_200"
-      android:textColor="@android:color/white" />
-
-  <Button
-      android:id="@+id/d_m"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:layout_marginTop="16dp"
-      android:text="Список встреч"
-      android:textSize="18sp"
-      android:padding="12dp"
-      android:backgroundTint="@color/blue"
-      android:textColor="@android:color/white" />
-
-  <Button
-      android:id="@+id/addFriendButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:layout_marginTop="16dp"
-      android:text="Добавить в друзья"
-      android:textSize="18sp"
-      android:padding="12dp"
-      android:backgroundTint="@color/green"
-      android:textColor="@android:color/white" />
-
-  <Button
-      android:id="@+id/viewFriendsButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:layout_marginTop="16dp"
-      android:text="Список друзей"
-      android:textSize="18sp"
-      android:padding="12dp"
-      android:backgroundTint="@color/gray_b"
-      android:textColor="@android:color/white" />
+      android:textColor="@android:color/white"
+      android:textSize="14sp"
+      android:backgroundTint="@color/fox_light_orange"/>
 
   <Button
       android:id="@+id/logoutButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Выход"
-      android:layout_gravity="center"
-      android:layout_marginTop="16dp"
-      android:backgroundTint="@color/red"
-      android:textColor="@android:color/white" />
-
+      android:layout_width="match_parent"
+      android:layout_height="40dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginBottom="16dp"
+      android:text="Выйти"
+      android:textColor="@android:color/white"
+      android:textSize="14sp"
+      android:backgroundTint="@color/fox_red"/>
 </LinearLayout>
-

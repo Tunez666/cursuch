@@ -1,5 +1,7 @@
 package com.example.alive;
 
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,16 +9,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-
+    private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "UserDatabase.db";
-    private static final int DATABASE_VERSION = 4; // Увеличиваем версию базы данных
+    private static final int DATABASE_VERSION = 4;
 
     public static final String TABLE_USERS = "users";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_USERNAME = "username";
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_PASSWORD = "password";
-    public static final String COLUMN_AVATAR = "avatar"; // Новый столбец для аватара
+    public static final String COLUMN_AVATAR = "avatar";
 
     public static final String TABLE_MEET = "meet";
     public static final String COLUMN_ID_M = "id_m";
@@ -37,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_USERNAME + " TEXT NOT NULL, "
             + COLUMN_EMAIL + " TEXT NOT NULL, "
             + COLUMN_PASSWORD + " TEXT NOT NULL, "
-            + COLUMN_AVATAR + " TEXT);"; // Добавляем столбец для аватара
+            + COLUMN_AVATAR + " TEXT);";
 
     private static final String DATABASE_CREATE_MEET = "CREATE TABLE "
             + TABLE_MEET + "("
@@ -66,52 +68,99 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             database.execSQL(DATABASE_CREATE_USERS);
             database.execSQL(DATABASE_CREATE_MEET);
             database.execSQL(DATABASE_CREATE_FRIENDS);
-            Log.i("DatabaseInfo", "Tables created successfully");
+            Log.i(TAG, "Таблицы успешно созданы");
         } catch (Exception e) {
-            Log.e("DatabaseError", "Error creating tables: " + e.getMessage());
+            Log.e(TAG, "Ошибка при создании таблиц: " + e.getMessage());
         }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.i("DatabaseUpgrade", "Upgrading database from version " + oldVersion + " to " + newVersion);
+        Log.i(TAG, "Обновление базы данных с версии " + oldVersion + " до " + newVersion);
         if (oldVersion < 3) {
             db.execSQL(DATABASE_CREATE_FRIENDS);
-            Log.i("DatabaseUpgrade", "Table 'friends' created");
+            Log.i(TAG, "Таблица 'friends' создана");
         }
         if (oldVersion < 4) {
             db.execSQL("ALTER TABLE " + TABLE_USERS + " ADD COLUMN " + COLUMN_AVATAR + " TEXT;");
-            Log.i("DatabaseUpgrade", "Added avatar column to users table");
+            Log.i(TAG, "Добавлен столбец avatar в таблицу users");
         }
     }
 
-    // Метод для проверки существования таблицы
-    public boolean isTableExists(String tableName) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "'", null);
-        boolean tableExists = cursor.getCount() > 0;
-        cursor.close();
-        return tableExists;
-    }
-
-    // Метод для обновления аватара пользователя
     public void updateUserAvatar(long userId, String avatarPath) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE " + TABLE_USERS + " SET " + COLUMN_AVATAR + " = ? WHERE " + COLUMN_ID + " = ?",
-                new String[]{avatarPath, String.valueOf(userId)});
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_AVATAR, avatarPath);
+        int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
+        Log.d(TAG, "Обновлен аватар для пользователя " + userId + ". Затронуто строк: " + rowsAffected);
     }
 
-    // Метод для получения пути к аватару пользователя
+    @SuppressLint("Range")
     public String getUserAvatar(long userId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + COLUMN_AVATAR + " FROM " + TABLE_USERS + " WHERE " + COLUMN_ID + " = ?",
-                new String[]{String.valueOf(userId)});
         String avatarPath = null;
-        if (cursor.moveToFirst()) {
-            avatarPath = cursor.getString(0);
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_AVATAR},
+                    COLUMN_ID + "=?", new String[]{String.valueOf(userId)},
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                avatarPath = cursor.getString(cursor.getColumnIndex(COLUMN_AVATAR));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при получении аватара пользователя: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        Log.d(TAG, "Получен аватар для пользователя " + userId + ": " + avatarPath);
+        return avatarPath;
+    }
+
+    @SuppressLint("Range")
+    public String getUserName(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String userName = null;
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_USERNAME},
+                    COLUMN_ID + "=?", new String[]{String.valueOf(userId)},
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                userName = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при получении имени пользователя: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        Log.d(TAG, "Получено имя пользователя для ID " + userId + ": " + userName);
+        return userName;
+    }
+
+    public void logAllUsers() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS, new String[]{COLUMN_ID, COLUMN_USERNAME, COLUMN_EMAIL},
+                null, null, null, null, null);
+
+        Log.d(TAG, "Все пользователи в базе данных:");
+        while(cursor.moveToNext()) {
+            @SuppressLint("Range") long id = cursor.getLong(cursor.getColumnIndex(COLUMN_ID));
+            @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+            @SuppressLint("Range") String email = cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL));
+            Log.d(TAG, "Пользователь: ID=" + id + ", Имя=" + name + ", Email=" + email);
         }
         cursor.close();
-        return avatarPath;
+    }
+
+    public Boolean checkUser(String username, String password){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("Select * from users where username = ? and password = ?", new String[]{username,password});
+        if(cursor.getCount()>0) return true;
+        else return false;
     }
 }
 
