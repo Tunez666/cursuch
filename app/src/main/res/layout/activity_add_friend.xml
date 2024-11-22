@@ -8,48 +8,42 @@
     android:background="@android:color/white">
 
     <TextView
-        android:id="@+id/titleTextView"
+        android:id="@+id/addFriendTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Главная"
-        android:textSize="32sp"
+        android:text="Добавить друга"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#000000"
         android:paddingBottom="16dp" />
 
-    <TextView
-        android:id="@+id/sub"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/usernameInput"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Мои встречи"
-        android:textSize="20sp"
-        android:textColor="#555555"
-        android:paddingBottom="24dp" />
-
-    <Button
-        android:id="@+id/add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Создать встречу"
-        android:textSize="18sp"
+        android:hint="Введите имя пользователя"
+        android:textSize="16sp"
         android:padding="12dp"
-        android:backgroundTint="@color/teal_200"
-        android:textColor="@android:color/white" />
+        android:backgroundTint="@color/teal_200" />
 
     <Button
-        android:id="@+id/openLkButton"
-        android:layout_width="wrap_content"
+        android:id="@+id/addFriendButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="16dp"
-        android:text="Личный кабинет"
+        android:text="Добавить"
         android:textSize="18sp"
-        android:padding="12dp"
-        android:backgroundTint="@color/purple_200"
+        android:backgroundTint="@color/blue"
         android:textColor="@android:color/white" />
 
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Отмена"
+        android:textSize="18sp"
+        android:backgroundTint="@color/red"
+        android:textColor="@android:color/white" />
 </LinearLayout>
-

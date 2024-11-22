@@ -14,4 +14,6 @@
     <color name="fox_dark_orange">#E65100</color>
     <color name="fox_light_orange">#FFB74D</color>
     <color name="fox_orange">#FF9800</color>
+    <color name="green">#4CAF50</color>
+    <color name="gray_b">#00BCD4</color>
 </resources>
