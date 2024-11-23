@@ -67,13 +67,5 @@
         android:layout_weight="1" />
 
     <!-- Подпись -->
-    <TextView
-        android:id="@+id/footerTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Добро пожаловать в приложение!"
-        android:textSize="14sp"
-        android:textColor="@color/fox_light_orange"
-        android:paddingTop="16dp" />
+    
 </LinearLayout>

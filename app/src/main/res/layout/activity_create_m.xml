@@ -6,101 +6,86 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@android:color/white"
+    android:background="@drawable/fox_gradient_background"
     tools:context=".create_m"
     android:gravity="center">
 
-    <!-- Заголовок -->
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:text="Создание встречи"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#333333"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="40dp" />
+        android:textColor="@color/fox_dark_orange"
+        android:layout_marginBottom="32dp" />
 
-    <!-- Название встречи -->
     <EditText
         android:id="@+id/namee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:hint="Название встречи"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:textColorHint="#333333"
-        android:background="@drawable/rounded_edittext"
-        android:layout_marginBottom="20dp" />
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/fox_edit_text_background"
+        android:textColorHint="@color/fox_light_orange"
+        android:layout_marginBottom="16dp" />
 
-    <!-- Место -->
     <EditText
         android:id="@+id/place"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:hint="Место"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:textColorHint="#333333"
-        android:background="@drawable/rounded_edittext"
-        android:layout_marginBottom="20dp" />
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/fox_edit_text_background"
+        android:textColorHint="@color/fox_light_orange"
+        android:layout_marginBottom="16dp" />
 
-    <!-- Дата -->
     <EditText
         android:id="@+id/datee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:hint="Дата"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:textColorHint="#333333"
-        android:background="@drawable/rounded_edittext"
-        android:layout_marginBottom="20dp" />
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/fox_edit_text_background"
+        android:textColorHint="@color/fox_light_orange"
+        android:layout_marginBottom="16dp" />
 
-    <!-- Время -->
     <EditText
         android:id="@+id/timee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:hint="Время"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:textColorHint="#333333"
-        android:background="@drawable/rounded_edittext"
-        android:layout_marginBottom="20dp" />
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/fox_edit_text_background"
+        android:textColorHint="@color/fox_light_orange"
+        android:layout_marginBottom="16dp" />
 
-    <!-- Описание -->
     <EditText
         android:id="@+id/desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:hint="Описание"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:textColorHint="#333333"
-        android:background="@drawable/rounded_edittext"
-        android:layout_marginBottom="30dp"
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:background="@drawable/fox_edit_text_background"
+        android:textColorHint="@color/fox_light_orange"
+        android:layout_marginBottom="24dp"
         android:inputType="textMultiLine"
         android:minHeight="100dp"
         android:maxLines="3" />
 
-    <!-- Кнопка "Создать" -->
     <Button
         android:id="@+id/cr_m"
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Создать"
-        android:layout_gravity="center"
-        android:textSize="20sp"
-        android:textColorHint="#333333"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/rounded_button"
-        android:textColor="@android:color/black" />
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"
+        android:textColor="@android:color/white"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
 </LinearLayout>

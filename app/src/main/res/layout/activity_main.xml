@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/fox_gradient_background"
+    android:orientation="vertical"
+    android:gravity="center"
     tools:context=".MainActivity">
 
     <ImageView
@@ -13,10 +14,7 @@
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:src="@drawable/fox_logo"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="80dp"/>
+        android:layout_marginBottom="24dp"/>
 
     <TextView
         android:id="@+id/titleTextView"
@@ -26,80 +24,64 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/fox_dark_orange"
-        app:layout_constraintTop_toBottomOf="@id/logoImageView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginBottom="32dp"/>
 
     <EditText
         android:id="@+id/usernameEditText"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         android:hint="Имя пользователя"
         android:inputType="text"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+        android:textColorHint="@color/fox_light_orange" />
 
     <EditText
         android:id="@+id/emailEditText"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         android:hint="Электронная почта"
         android:inputType="textEmailAddress"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/usernameEditText" />
+        android:textColorHint="@color/fox_light_orange" />
 
     <EditText
         android:id="@+id/passwordEditText"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="24dp"
         android:hint="Пароль"
         android:inputType="textPassword"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/emailEditText" />
+        android:textColorHint="@color/fox_light_orange" />
 
     <Button
         android:id="@+id/registerButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Зарегистрироваться"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:text="Зарегестрироваться"
         android:textColor="@android:color/white"
-        android:background="@drawable/fox_button_background"
-        app:layout_constraintTop_toBottomOf="@id/passwordEditText"
-        app:layout_constraintStart_toStartOf="@id/passwordEditText"
-        app:layout_constraintEnd_toEndOf="@id/passwordEditText"
-        android:layout_marginTop="32dp"/>
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"/>
 
     <TextView
         android:id="@+id/logButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Уже есть аккаунт? Войти"
-        android:textColor="@color/fox_dark_orange"
-        app:layout_constraintTop_toBottomOf="@id/registerButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:textColor="@color/fox_dark_orange"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
