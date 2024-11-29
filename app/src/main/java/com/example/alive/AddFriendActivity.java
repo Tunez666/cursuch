@@ -1,21 +1,21 @@
 package com.example.alive;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
+import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class AddFriendActivity extends AppCompatActivity {
+
+    private static final String TAG = "AddFriendActivity"; // Логирование
     private EditText usernameInput;
-    private Button addFriendButton;
-    private Button cancelButton;
-    private DatabaseHelper dbHelper;
+    private Button addFriendButton, cancelButton, clearB;
+    private DatabaseHelper databaseHelper;
+    private long currentUserId; // ID текущего пользователя
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,78 +25,64 @@ public class AddFriendActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.usernameInput);
         addFriendButton = findViewById(R.id.addFriendButton);
         cancelButton = findViewById(R.id.cancelButton);
+        clearB = findViewById(R.id.clearB);
 
-        dbHelper = new DatabaseHelper(this);
+        // Инициализация DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
+
+        // Получаем ID текущего пользователя из Intent
+        currentUserId = getIntent().getLongExtra("user_id", -1);
+
+        // Логирование для проверки значения currentUserId
+        Log.d(TAG, "Получен ID пользователя: " + currentUserId);
+
+        // Проверка на получение корректного ID пользователя
+        if (currentUserId == -1) {
+            Toast.makeText(this, "Ошибка: Не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
+            finish(); // Закрываем активность, если ID не получен
+            return;
+        }
 
         addFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String username = usernameInput.getText().toString().trim();
+
                 if (username.isEmpty()) {
                     Toast.makeText(AddFriendActivity.this, "Введите имя пользователя", Toast.LENGTH_SHORT).show();
                 } else {
-                    addFriend(username);
+                    long friendId = databaseHelper.getUserIdByUsername(username);
+                    if (friendId != -1 && friendId != currentUserId) {
+                        // Добавляем друга в базу данных
+                        databaseHelper.addFriend(currentUserId, friendId);
+                        Toast.makeText(AddFriendActivity.this, "Друг добавлен", Toast.LENGTH_SHORT).show();
+                        finish(); // Закрываем текущую активность
+                    } else {
+                        Toast.makeText(AddFriendActivity.this, "Пользователь не найден или это ваш ID", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
 
+        // Обработчик для кнопки "Очистить список друзей"
+        clearB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentUserId != -1) {
+                    databaseHelper.clearFriends(currentUserId); // Очистить список друзей
+                    Toast.makeText(AddFriendActivity.this, "Список друзей очищен", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddFriendActivity.this, "Ошибка: Не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Обработчик для кнопки "Отмена"
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(); // Закрыть активность
+                finish(); // Закрываем текущую активность
             }
         });
-    }
-
-    private void addFriend(String username) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(DatabaseHelper.TABLE_USERS,
-                new String[]{DatabaseHelper.COLUMN_ID},
-                DatabaseHelper.COLUMN_USERNAME + "=?",
-                new String[]{username},
-                null, null, null);
-
-        if (cursor.moveToFirst()) {
-            int friendId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
-            cursor.close();
-
-            // Проверяем, нет ли уже дружбы
-            db = dbHelper.getReadableDatabase();
-            Cursor friendCursor = db.query(DatabaseHelper.TABLE_FRIENDS,
-                    null,
-                    DatabaseHelper.COLUMN_USER_ID + "=? AND " + DatabaseHelper.COLUMN_FRIEND_ID + "=?",
-                    new String[]{String.valueOf(getCurrentUserId()), String.valueOf(friendId)},
-                    null, null, null);
-
-            if (friendCursor.getCount() > 0) {
-                Toast.makeText(this, "Этот пользователь уже у вас в друзьях", Toast.LENGTH_SHORT).show();
-                friendCursor.close();
-                return;
-            }
-            friendCursor.close();
-
-            // Добавляем друга
-            ContentValues values = new ContentValues();
-            values.put(DatabaseHelper.COLUMN_USER_ID, getCurrentUserId());
-            values.put(DatabaseHelper.COLUMN_FRIEND_ID, friendId);
-
-            db = dbHelper.getWritableDatabase();
-            long result = db.insert(DatabaseHelper.TABLE_FRIENDS, null, values);
-            if (result != -1) {
-                Toast.makeText(this, "Друг успешно добавлен!", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(this, "Ошибка добавления друга", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(this, "Пользователь с таким именем не найден", Toast.LENGTH_SHORT).show();
-            cursor.close();
-        }
-    }
-
-    private int getCurrentUserId() {
-        // Здесь предполагается, что ID текущего пользователя берётся из SharedPreferences или другого источника
-        // Для примера, возвращаем заглушку
-        return 1;
     }
 }

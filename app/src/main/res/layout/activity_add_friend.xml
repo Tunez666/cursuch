@@ -44,6 +44,14 @@
         android:backgroundTint="@color/fox_orange"/>
 
     <Button
+        android:id="@+id/clearB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Очистить друзей"
+        android:textColor="@color/fox_dark_orange"
+        android:background="?android:attr/selectableItemBackground"/>
+
+    <Button
         android:id="@+id/cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

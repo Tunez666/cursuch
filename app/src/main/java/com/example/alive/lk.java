@@ -10,7 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -28,13 +29,28 @@ public class lk extends AppCompatActivity {
     private CircleImageView profileImageView;
     private TextView userNameTextView;
     private DatabaseHelper databaseHelper;
-    private static final int PICK_IMAGE = 100;
     private long userId;
+
+    // Новый лаунчер для выбора изображения
+    private ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri imageUri = result.getData().getData();
+                    if (imageUri != null) {
+                        getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        String imagePath = imageUri.toString();
+                        databaseHelper.updateUserAvatar(userId, imagePath);
+                        loadUserAvatar();
+                        Toast.makeText(this, "Аватар обновлен", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lk);
 
         databaseHelper = new DatabaseHelper(this);
@@ -42,6 +58,12 @@ public class lk extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         userId = prefs.getLong("userId", -1);
         Log.d(TAG, "ID пользователя из SharedPreferences: " + userId);
+
+        // Проверка на случай если userId не был найден в SharedPreferences
+        if (userId == -1) {
+            Toast.makeText(this, "Ошибка: ID пользователя не найден", Toast.LENGTH_SHORT).show();
+            return; // Если ID не найден, не продолжать выполнение
+        }
 
         dBut = findViewById(R.id.deug);
         debug_m = findViewById(R.id.d_m);
@@ -56,36 +78,26 @@ public class lk extends AppCompatActivity {
         loadUserAvatar();
         databaseHelper.logAllUsers();
 
-        dBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(lk.this, user_list.class);
-                startActivity(intent);
-            }
+        dBut.setOnClickListener(v -> {
+            Intent intent = new Intent(lk.this, user_list.class);
+            startActivity(intent);
         });
 
-        debug_m.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(lk.this, md.class);
-                startActivity(intent);
-            }
+        debug_m.setOnClickListener(v -> {
+            Intent intent = new Intent(lk.this, md.class);
+            startActivity(intent);
         });
 
-        addFriendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(lk.this, AddFriendActivity.class);
-                startActivity(intent);
-            }
+        addFriendButton.setOnClickListener(v -> {
+            // Передаем userId в AddFriendActivity
+            Intent intent = new Intent(lk.this, AddFriendActivity.class);
+            intent.putExtra("user_id", userId); // Передаем ID пользователя
+            startActivity(intent);
         });
 
-        viewFriendsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(lk.this, FriendsListActivity.class);
-                startActivity(intent);
-            }
+        viewFriendsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(lk.this, FriendsListActivity.class);
+            startActivity(intent);
         });
 
         logoutButton.setOnClickListener(view -> {
@@ -101,34 +113,14 @@ public class lk extends AppCompatActivity {
             finish();
         });
 
-        changeAvatarButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openGallery();
-            }
-        });
+        changeAvatarButton.setOnClickListener(v -> openGallery());
     }
 
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
-            Uri imageUri = data.getData();
-            if (imageUri != null) {
-                getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                String imagePath = imageUri.toString();
-                databaseHelper.updateUserAvatar(userId, imagePath);
-                loadUserAvatar();
-                Toast.makeText(this, "Аватар обновлен", Toast.LENGTH_SHORT).show();
-            }
-        }
+        galleryLauncher.launch(intent);
     }
 
     private void loadUserAvatar() {
@@ -160,4 +152,3 @@ public class lk extends AppCompatActivity {
         }
     }
 }
-

@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "UserDatabase.db";
@@ -87,6 +90,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.i(TAG, "Понижение версии базы данных с " + oldVersion + " до " + newVersion + " не поддерживается.");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRIENDS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        onCreate(db);
+    }
+
     public void updateUserAvatar(long userId, String avatarPath) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -147,7 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null, null, null, null, null);
 
         Log.d(TAG, "Все пользователи в базе данных:");
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             @SuppressLint("Range") long id = cursor.getLong(cursor.getColumnIndex(COLUMN_ID));
             @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
             @SuppressLint("Range") String email = cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL));
@@ -156,11 +168,79 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
     }
 
-    public Boolean checkUser(String username, String password){
+    public long getUserIdByUsername(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("Select * from users where username = ? and password = ?", new String[]{username,password});
-        if(cursor.getCount()>0) return true;
-        else return false;
+        String query = "SELECT " + COLUMN_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_USERNAME + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor != null && cursor.moveToFirst()) {
+            @SuppressLint("Range") long userId = cursor.getLong(cursor.getColumnIndex(COLUMN_ID));
+            cursor.close();
+            return userId;
+        }
+        return -1; // Пользователь не найден
+    }
+
+    // Метод для добавления друга
+    public void addFriend(long userId, long friendId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        // Добавляем друга для userId
+        values.put(COLUMN_USER_ID, userId);
+        values.put(COLUMN_FRIEND_ID, friendId);
+        long result1 = db.insert(TABLE_FRIENDS, null, values);
+
+        // Добавляем userId для friendId
+        values.put(COLUMN_USER_ID, friendId);
+        values.put(COLUMN_FRIEND_ID, userId);
+        long result2 = db.insert(TABLE_FRIENDS, null, values);
+
+        if (result1 == -1 || result2 == -1) {
+            Log.e(TAG, "Не удалось добавить друга");
+        } else {
+            Log.i(TAG, "Друг успешно добавлен");
+        }
+    }
+
+
+    // Метод для получения списка друзей
+    public List<String> getFriends(long userId) {
+        List<String> friendsList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT " + COLUMN_USERNAME + " FROM " + TABLE_USERS +
+                " INNER JOIN " + TABLE_FRIENDS + " ON " + TABLE_USERS + "." + COLUMN_ID +
+                " = " + TABLE_FRIENDS + "." + COLUMN_FRIEND_ID +
+                " WHERE " + TABLE_FRIENDS + "." + COLUMN_USER_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+
+        Log.d(TAG, "Запрос выполнен: " + query);
+        while (cursor.moveToNext()) {
+            @SuppressLint("Range") String friendName = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+            friendsList.add(friendName);
+            Log.d(TAG, "Друг: " + friendName); // Логирование каждого имени друга
+        }
+        cursor.close();
+        return friendsList;
+    }
+    public void clearFriends(long userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Удаляем все записи из таблицы друзей для конкретного пользователя
+        int rowsDeleted = db.delete(TABLE_FRIENDS, COLUMN_USER_ID + " = ? OR " + COLUMN_FRIEND_ID + " = ?",
+                new String[]{String.valueOf(userId), String.valueOf(userId)});
+
+        if (rowsDeleted > 0) {
+            Log.i(TAG, "Список друзей успешно очищен");
+        } else {
+            Log.e(TAG, "Не удалось очистить список друзей");
+        }
+    }
+
+    public Boolean checkUser(String username, String password) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE username = ? AND password = ?", new String[]{username, password});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
     }
 }
-

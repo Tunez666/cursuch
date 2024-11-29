@@ -37,7 +37,8 @@
         android:inputType="text"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange" />
+        android:textColorHint="@color/fox_light_orange"
+        android:textColor="#000000"/>
 
     <EditText
         android:id="@+id/emailEditText"
@@ -50,7 +51,8 @@
         android:inputType="textEmailAddress"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange" />
+        android:textColorHint="@color/fox_light_orange"
+        android:textColor="#000000"/>
 
     <EditText
         android:id="@+id/passwordEditText"
@@ -63,7 +65,8 @@
         android:inputType="textPassword"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
-        android:textColorHint="@color/fox_light_orange" />
+        android:textColorHint="@color/fox_light_orange"
+        android:textColor="#000000"/>
 
     <Button
         android:id="@+id/registerButton"
