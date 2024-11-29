@@ -48,8 +48,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + TABLE_MEET + "("
             + COLUMN_ID_M + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_NAME + " TEXT NOT NULL, "
-            + COLUMN_DATE + " TEXT NOT NULL, "
-            + COLUMN_TIME + " TEXT NOT NULL, "
+            + COLUMN_DATE + " INTEGER NOT NULL, " // Метка времени
+            + COLUMN_TIME + " INTEGER NOT NULL, " // Если дата и время хранятся вместе, этот столбец можно убрать
             + COLUMN_PLACE + " TEXT NOT NULL, "
             + COLUMN_DECS + " TEXT NOT NULL);";
 
@@ -200,6 +200,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             Log.i(TAG, "Друг успешно добавлен");
         }
+    }
+    public void addMeet(String name, long timestamp, String place, String description) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, name);
+        values.put(COLUMN_DATE, timestamp); // Метка времени в секундах
+        values.put(COLUMN_PLACE, place);
+        values.put(COLUMN_DECS, description);
+        long result = db.insert(TABLE_MEET, null, values);
+        if (result == -1) {
+            Log.e(TAG, "Не удалось добавить встречу");
+        } else {
+            Log.i(TAG, "Встреча успешно добавлена");
+        }
+    }
+    public String getFormattedDate(long timestamp) {
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
+        return format.format(new java.util.Date(timestamp * 1000)); // Умножаем на 1000 для миллисекунд
     }
 
 

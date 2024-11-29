@@ -8,6 +8,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class md extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
@@ -33,18 +37,24 @@ public class md extends AppCompatActivity {
 
         if (cursor != null && cursor.getCount() > 0) {
             StringBuilder details = new StringBuilder();
+
+            // Форматирование даты и времени
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+
             while (cursor.moveToNext()) {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID_M));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE));
-                String time = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TIME));
+                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE)); // Метка времени
                 String place = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLACE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DECS));
 
+                // Преобразование timestamp в читабельную дату и время
+                String dateTime = dateFormat.format(new Date(timestamp * 1000)); // Конвертируем в миллисекунды
+
+                // Формируем строку для отображения
                 details.append("ID: ").append(id)
                         .append("\nНазвание: ").append(name)
-                        .append("\nДата: ").append(date)
-                        .append("\nВремя: ").append(time)
+                        .append("\nДата и время: ").append(dateTime)
                         .append("\nМесто: ").append(place)
                         .append("\nОписание: ").append(description)
                         .append("\n\n-------------------\n\n");

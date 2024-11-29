@@ -44,29 +44,33 @@
         android:layout_marginBottom="16dp"
         android:textColor="#000000"/>
 
-    <EditText
+    <TextView
         android:id="@+id/datee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Дата"
+        android:hint="Выберите дату"
         android:textSize="16sp"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
         android:textColorHint="@color/fox_light_orange"
         android:layout_marginBottom="16dp"
-        android:textColor="#000000"/>
+        android:textColor="#000000"
+        android:focusable="false"
+        android:clickable="true" />
 
-    <EditText
+    <TextView
         android:id="@+id/timee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Время"
+        android:hint="Выберите время"
         android:textSize="16sp"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
         android:textColorHint="@color/fox_light_orange"
         android:layout_marginBottom="16dp"
-        android:textColor="#000000"/>
+        android:textColor="#000000"
+        android:focusable="false"
+        android:clickable="true" />
 
     <EditText
         android:id="@+id/desc"
