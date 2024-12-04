@@ -98,7 +98,7 @@ public class create_m extends AppCompatActivity {
         values.put(DatabaseHelper.COLUMN_NAME, name);
         values.put(DatabaseHelper.COLUMN_DATE, timestamp); // Вставляем метку времени
         values.put(DatabaseHelper.COLUMN_PLACE, place);
-        values.put(DatabaseHelper.COLUMN_DECS, description);
+        values.put(DatabaseHelper.COLUMN_DESC, description);
         values.put(DatabaseHelper.COLUMN_TIME, time); // Вставляем время
 
         long result = database.insert(DatabaseHelper.TABLE_MEET, null, values);

@@ -16,6 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "UserDatabase.db";
     private static final int DATABASE_VERSION = 4;
 
+    // Константы для таблиц и колонок
     public static final String TABLE_USERS = "users";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_USERNAME = "username";
@@ -29,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_PLACE = "place";
-    public static final String COLUMN_DECS = "descr";
+    public static final String COLUMN_DESC = "descr"; // Исправлено название константы
 
     public static final String TABLE_FRIENDS = "friends";
     public static final String COLUMN_FRIENDSHIP_ID = "friendship_id";
@@ -48,10 +49,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + TABLE_MEET + "("
             + COLUMN_ID_M + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_NAME + " TEXT NOT NULL, "
-            + COLUMN_DATE + " INTEGER NOT NULL, " // Метка времени
-            + COLUMN_TIME + " INTEGER NOT NULL, " // Если дата и время хранятся вместе, этот столбец можно убрать
+            + COLUMN_DATE + " INTEGER NOT NULL, "
+            + COLUMN_TIME + " INTEGER NOT NULL, "
             + COLUMN_PLACE + " TEXT NOT NULL, "
-            + COLUMN_DECS + " TEXT NOT NULL);";
+            + COLUMN_DESC + " TEXT NOT NULL);"; // Используется правильная константа
 
     private static final String DATABASE_CREATE_FRIENDS = "CREATE TABLE "
             + TABLE_FRIENDS + "("
@@ -180,22 +181,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return -1; // Пользователь не найден
     }
 
+    public User getUserById(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        User user = null;
+
+        try (Cursor cursor = db.rawQuery("SELECT " + COLUMN_ID + ", " + COLUMN_USERNAME + ", " + COLUMN_EMAIL +
+                " FROM " + TABLE_USERS + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(userId)})) {
+            if (cursor.moveToFirst()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                String username = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME));
+                String email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
+                user = new User(id, username, email);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка выполнения запроса", e);
+        }
+        return user;
+    }
+
     // Метод для добавления друга
     public void addFriend(long userId, long friendId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
 
-        // Добавляем друга для userId
+        // Проверка на уникальность
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_FRIENDS +
+                        " WHERE (" + COLUMN_USER_ID + " = ? AND " + COLUMN_FRIEND_ID + " = ?) " +
+                        "OR (" + COLUMN_USER_ID + " = ? AND " + COLUMN_FRIEND_ID + " = ?)",
+                new String[]{String.valueOf(userId), String.valueOf(friendId),
+                        String.valueOf(friendId), String.valueOf(userId)});
+        if (cursor.getCount() > 0) {
+            Log.e(TAG, "Такая связь уже существует");
+            cursor.close();
+            return;
+        }
+        cursor.close();
+
+        ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, userId);
         values.put(COLUMN_FRIEND_ID, friendId);
-        long result1 = db.insert(TABLE_FRIENDS, null, values);
+        long result = db.insert(TABLE_FRIENDS, null, values);
 
-        // Добавляем userId для friendId
-        values.put(COLUMN_USER_ID, friendId);
-        values.put(COLUMN_FRIEND_ID, userId);
-        long result2 = db.insert(TABLE_FRIENDS, null, values);
-
-        if (result1 == -1 || result2 == -1) {
+        if (result == -1) {
             Log.e(TAG, "Не удалось добавить друга");
         } else {
             Log.i(TAG, "Друг успешно добавлен");
@@ -205,9 +231,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
-        values.put(COLUMN_DATE, timestamp); // Метка времени в секундах
+        values.put(COLUMN_DATE, timestamp);
         values.put(COLUMN_PLACE, place);
-        values.put(COLUMN_DECS, description);
+        values.put(COLUMN_DESC, description); // Используем правильную константу
         long result = db.insert(TABLE_MEET, null, values);
         if (result == -1) {
             Log.e(TAG, "Не удалось добавить встречу");
@@ -223,24 +249,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Метод для получения списка друзей
     public List<String> getFriends(long userId) {
-        List<String> friendsList = new ArrayList<>();
+        List<String> friends = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String query = "SELECT " + COLUMN_USERNAME + " FROM " + TABLE_USERS +
-                " INNER JOIN " + TABLE_FRIENDS + " ON " + TABLE_USERS + "." + COLUMN_ID +
-                " = " + TABLE_FRIENDS + "." + COLUMN_FRIEND_ID +
-                " WHERE " + TABLE_FRIENDS + "." + COLUMN_USER_ID + " = ?";
+        // Запрос для получения имен друзей
+        String query = "SELECT u." + COLUMN_USERNAME + " FROM " + TABLE_FRIENDS + " f " +
+                "JOIN " + TABLE_USERS + " u ON f." + COLUMN_FRIEND_ID + " = u." + COLUMN_ID +
+                " WHERE f." + COLUMN_USER_ID + " = ?";
+
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
 
-        Log.d(TAG, "Запрос выполнен: " + query);
-        while (cursor.moveToNext()) {
-            @SuppressLint("Range") String friendName = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
-            friendsList.add(friendName);
-            Log.d(TAG, "Друг: " + friendName); // Логирование каждого имени друга
+        if (cursor.moveToFirst()) {
+            do {
+                String friendName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME));
+                friends.add(friendName);
+            } while (cursor.moveToNext());
         }
         cursor.close();
-        return friendsList;
+        return friends;
     }
+
+
+
     public void clearFriends(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
         // Удаляем все записи из таблицы друзей для конкретного пользователя

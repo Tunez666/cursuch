@@ -7,7 +7,6 @@
     android:gravity="center"
     android:background="@drawable/fox_gradient_background">
 
-
     <TextView
         android:id="@+id/addFriendTitle"
         android:layout_width="wrap_content"
@@ -15,6 +14,15 @@
         android:text="Добавить друга"
         android:textSize="28sp"
         android:textStyle="bold"
+        android:textColor="@color/fox_dark_orange"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/currentUserId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ваш ID: "
+        android:textSize="16sp"
         android:textColor="@color/fox_dark_orange"
         android:layout_marginBottom="32dp" />
 
@@ -25,8 +33,8 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="24dp"
-        android:hint="Введите имя пользователя"
-        android:inputType="text"
+        android:hint="Введите ID пользователя"
+        android:inputType="number"
         android:padding="16dp"
         android:background="@drawable/fox_edit_text_background"
         android:textColorHint="@color/fox_light_orange" />
@@ -42,6 +50,26 @@
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:backgroundTint="@color/fox_orange"/>
+    <Button
+        android:id="@+id/searchButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:text="Найти пользователя"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:backgroundTint="@color/fox_orange"/>
+
+    <TextView
+        android:id="@+id/searchResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Результат поиска появится здесь"
+        android:textSize="16sp"
+        android:textColor="@color/fox_dark_orange" />
 
     <Button
         android:id="@+id/clearB"

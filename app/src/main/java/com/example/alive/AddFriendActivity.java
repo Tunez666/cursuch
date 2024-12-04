@@ -1,10 +1,12 @@
 package com.example.alive;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,10 +15,13 @@ public class AddFriendActivity extends AppCompatActivity {
 
     private static final String TAG = "AddFriendActivity"; // Логирование
     private EditText usernameInput;
-    private Button addFriendButton, cancelButton, clearB;
+    private Button addFriendButton, cancelButton, clearB, searchButton;
+    private TextView searchResult;
+
     private DatabaseHelper databaseHelper;
     private long currentUserId; // ID текущего пользователя
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +31,9 @@ public class AddFriendActivity extends AppCompatActivity {
         addFriendButton = findViewById(R.id.addFriendButton);
         cancelButton = findViewById(R.id.cancelButton);
         clearB = findViewById(R.id.clearB);
+        searchButton = findViewById(R.id.searchButton);
+        searchResult = findViewById(R.id.searchResult);
+        TextView currentUserIdView = findViewById(R.id.currentUserId);
 
         // Инициализация DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
@@ -35,6 +43,7 @@ public class AddFriendActivity extends AppCompatActivity {
 
         // Логирование для проверки значения currentUserId
         Log.d(TAG, "Получен ID пользователя: " + currentUserId);
+        currentUserIdView.setText("Ваш ID: " + currentUserId);
 
         // Проверка на получение корректного ID пользователя
         if (currentUserId == -1) {
@@ -43,46 +52,67 @@ public class AddFriendActivity extends AppCompatActivity {
             return;
         }
 
-        addFriendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = usernameInput.getText().toString().trim();
-
-                if (username.isEmpty()) {
-                    Toast.makeText(AddFriendActivity.this, "Введите имя пользователя", Toast.LENGTH_SHORT).show();
-                } else {
-                    long friendId = databaseHelper.getUserIdByUsername(username);
-                    if (friendId != -1 && friendId != currentUserId) {
-                        // Добавляем друга в базу данных
-                        databaseHelper.addFriend(currentUserId, friendId);
-                        Toast.makeText(AddFriendActivity.this, "Друг добавлен", Toast.LENGTH_SHORT).show();
-                        finish(); // Закрываем текущую активность
-                    } else {
-                        Toast.makeText(AddFriendActivity.this, "Пользователь не найден или это ваш ID", Toast.LENGTH_SHORT).show();
-                    }
+        // Обработчик для кнопки поиска
+        searchButton.setOnClickListener(v -> {
+            try {
+                String inputId = usernameInput.getText().toString().trim();
+                if (inputId.isEmpty()) {
+                    Toast.makeText(AddFriendActivity.this, "Введите ID пользователя для поиска", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-            }
-        });
 
-        // Обработчик для кнопки "Очистить список друзей"
-        clearB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (currentUserId != -1) {
-                    databaseHelper.clearFriends(currentUserId); // Очистить список друзей
-                    Toast.makeText(AddFriendActivity.this, "Список друзей очищен", Toast.LENGTH_SHORT).show();
+                long friendId = Long.parseLong(inputId);
+                String friendName = databaseHelper.getUserName(friendId);
+
+                if (friendName != null) {
+                    searchResult.setText("Найден пользователь: " + friendName);
                 } else {
-                    Toast.makeText(AddFriendActivity.this, "Ошибка: Не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
+                    searchResult.setText("Пользователь с ID " + friendId + " не найден");
                 }
+            } catch (NumberFormatException e) {
+                Toast.makeText(AddFriendActivity.this, "Введите корректный ID пользователя (число)", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Обработчик для кнопки "Отмена"
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // Закрываем текущую активность
+
+        // Обработчик для кнопки добавления друга
+        addFriendButton.setOnClickListener(v -> {
+            String inputId = usernameInput.getText().toString().trim();
+            if (inputId.isEmpty()) {
+                Toast.makeText(AddFriendActivity.this, "Введите ID пользователя для добавления", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                long friendId = Long.parseLong(inputId);
+                if (friendId == currentUserId) {
+                    Toast.makeText(AddFriendActivity.this, "Нельзя добавить себя в друзья", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                databaseHelper.addFriend(currentUserId, friendId);
+                Toast.makeText(AddFriendActivity.this, "Пользователь успешно добавлен в друзья", Toast.LENGTH_SHORT).show();
+            } catch (NumberFormatException e) {
+                Toast.makeText(AddFriendActivity.this, "Введите корректный ID пользователя (число)", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Обработчик для кнопки очистки друзей
+        clearB.setOnClickListener(v -> {
+            databaseHelper.clearFriends(currentUserId);
+            Toast.makeText(AddFriendActivity.this, "Список друзей очищен", Toast.LENGTH_SHORT).show();
+        });
+
+
+        // Обработчик для кнопки отмены
+        cancelButton.setOnClickListener(v -> {
+            finish(); // Закрыть текущую активность
+        });
+    }
+
+        // Метод для отображения информации о пользователе
+    private void displayUserInfo(User user) {
+        String userInfo = "ID: " + user.getId() + "\nИмя: " + user.getUsername() + "\nEmail: " + user.getEmail();
+        searchResult.setText(userInfo);
     }
 }

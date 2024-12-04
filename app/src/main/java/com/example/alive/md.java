@@ -46,7 +46,7 @@ public class md extends AppCompatActivity {
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME));
                 long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE)); // Метка времени
                 String place = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLACE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DECS));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DESC));
 
                 // Преобразование timestamp в читабельную дату и время
                 String dateTime = dateFormat.format(new Date(timestamp * 1000)); // Конвертируем в миллисекунды
