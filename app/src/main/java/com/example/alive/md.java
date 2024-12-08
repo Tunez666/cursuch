@@ -1,69 +1,131 @@
 package com.example.alive;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class md extends AppCompatActivity {
 
+    private static final String TAG = "mdActivity"; // Added TAG for logging
     private DatabaseHelper dbHelper;
-    private TextView detailsTextView;
+    private ListView meetingsListView;
+    private Button clearMeetingsButton;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_md);
 
-        detailsTextView = findViewById(R.id.detailsTextView);
+        meetingsListView = findViewById(R.id.meetingsListView);
+        clearMeetingsButton = findViewById(R.id.clearMeetingsButton);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
         dbHelper = new DatabaseHelper(this);
 
-        displayAllMeetingDetails();
+        long currentUserId = getCurrentUserId();
+        if (currentUserId != -1) {
+            displayUserMeetings(currentUserId);
+        } else {
+            Toast.makeText(this, "Ошибка: Не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
+        }
+
+        clearMeetingsButton.setOnClickListener(v -> {
+            clearUserMeetings(currentUserId);
+        });
+
+        setupBottomNavigation();
     }
 
-    private void displayAllMeetingDetails() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+    private long getCurrentUserId() {
+        SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        long userId = preferences.getLong("currentUserId", -1);
+        Log.d(TAG, "Получен ID пользователя: " + userId);
+        return userId;
+    }
 
-        // Запрос для получения всех данных встреч
-        String query = "SELECT * FROM " + DatabaseHelper.TABLE_MEET;
-        Cursor cursor = db.rawQuery(query, null);
+    private void displayUserMeetings(long userId) {
+        Log.d(TAG, "Попытка отобразить встречи для пользователя с ID: " + userId); // Added log
+        Cursor cursor = dbHelper.getMeetingsForUser(userId);
+        List<String> meetingsList = new ArrayList<>();
+
+        Log.d(TAG, "Количество найденных встреч: " + (cursor != null ? cursor.getCount() : 0)); // Added log
 
         if (cursor != null && cursor.getCount() > 0) {
-            StringBuilder details = new StringBuilder();
-
-            // Форматирование даты и времени
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
 
             while (cursor.moveToNext()) {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID_M));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NAME));
-                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE)); // Метка времени
+                long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE));
+                String dateTime = dateFormat.format(new Date(timestamp * 1000));
                 String place = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLACE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DESC));
 
-                // Преобразование timestamp в читабельную дату и время
-                String dateTime = dateFormat.format(new Date(timestamp * 1000)); // Конвертируем в миллисекунды
+                Log.d(TAG, "Встреча: " + name + " - " + dateTime); // Added log
 
-                // Формируем строку для отображения
-                details.append("ID: ").append(id)
-                        .append("\nНазвание: ").append(name)
-                        .append("\nДата и время: ").append(dateTime)
-                        .append("\nМесто: ").append(place)
-                        .append("\nОписание: ").append(description)
-                        .append("\n\n-------------------\n\n");
+                meetingsList.add(name + " - " + dateTime + " at " + place);
             }
-            detailsTextView.setText(details.toString());
             cursor.close();
-        } else {
-            detailsTextView.setText("Нет данных о встречах.");
-            Toast.makeText(this, "Данные о встречах отсутствуют", Toast.LENGTH_SHORT).show();
+        }
+
+        if (meetingsList.isEmpty()) {
+            meetingsList.add("У вас пока нет созданных встреч.");
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, meetingsList);
+        meetingsListView.setAdapter(adapter);
+    }
+
+    private void clearUserMeetings(long userId) {
+        dbHelper.clearMeetings(userId);
+        Toast.makeText(this, "Список встреч очищен", Toast.LENGTH_SHORT).show();
+        displayUserMeetings(userId);
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(md.this, glavnay.class));
+                return true;
+            } else if (itemId == R.id.nav_friends) {
+                startActivity(new Intent(md.this, FriendsListActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_create) {
+                startActivity(new Intent(md.this, create_m.class));
+                return true;
+            } else if (itemId == R.id.nav_md) {
+                // Уже на странице встреч
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                startActivity(new Intent(md.this, lk.class));
+                return true;
+            }
+            return false;
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        long currentUserId = getCurrentUserId();
+        if (currentUserId != -1) {
+            displayUserMeetings(currentUserId);
         }
     }
 
@@ -73,3 +135,4 @@ public class md extends AppCompatActivity {
         super.onDestroy();
     }
 }
+

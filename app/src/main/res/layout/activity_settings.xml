@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fox_gradient_background"
+    tools:context=".settings">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/default_avatar"
+            app:civ_border_color="@color/fox_dark_orange"
+            app:civ_border_width="2dp"
+            android:layout_marginTop="32dp"/>
+
+        <TextView
+            android:id="@+id/userNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Имя пользователя"
+            android:textColor="@android:color/black"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/fox_light_orange"
+            android:alpha="0.3"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"/>
+
+        <EditText
+            android:id="@+id/newUsernameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:hint="Новое имя пользователя"
+            android:textColorHint="@android:color/black"
+            android:textColor="@android:color/black"
+            android:inputType="text"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:background="@android:color/white"/>
+
+        <EditText
+            android:id="@+id/newPasswordEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:hint="Новый пароль"
+            android:textColorHint="@android:color/black"
+            android:textColor="@android:color/black"
+            android:inputType="textPassword"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:background="@android:color/white"/>
+
+        <Button
+            android:id="@+id/saveChangesButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="Сохранить изменения"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:backgroundTint="@color/fox_orange"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/changeAvatarButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Изменить аватар"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/fox_orange"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/deug"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Список пользователей"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:backgroundTint="@color/fox_orange"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/d_m"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Отладка встреч"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:backgroundTint="@color/fox_orange"/>
+
+        <Button
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Назад"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/fox_orange"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Выйти"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/fox_red"/>
+
+    </LinearLayout>
+</ScrollView>
+

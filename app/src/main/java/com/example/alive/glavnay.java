@@ -1,45 +1,51 @@
 package com.example.alive;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class glavnay extends AppCompatActivity {
     private Button addb;
-    private Button openLkButton;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_glavnay);
 
         addb = findViewById(R.id.add);
-        openLkButton = findViewById(R.id.openLkButton);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        addb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Переход на страницу создания встречи
-                Intent intent = new Intent(glavnay.this, create_m.class);
-                startActivity(intent);
+        // Настройка нижней навигации
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                // Уже на главной странице
+                return true;
+            } else if (itemId == R.id.nav_create) {
+                startActivity(new Intent(glavnay.this, create_m.class));
+                return true;
+            } else if (itemId == R.id.nav_friends) {
+                startActivity(new Intent(glavnay.this, FriendsListActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_md) {
+                startActivity(new Intent(glavnay.this, md.class));
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                startActivity(new Intent(glavnay.this, lk.class));
+                return true;
             }
+            return false;
         });
 
-        openLkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Переход в личный кабинет
-                Intent intent = new Intent(glavnay.this, lk.class);
-                startActivity(intent);
-            }
+        // Существующие обработчики кнопок
+        addb.setOnClickListener(v -> {
+            Intent intent = new Intent(glavnay.this, create_m.class);
+            startActivity(intent);
         });
     }
 }
-

@@ -1,71 +1,81 @@
-<LinearLayout
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/fox_gradient_background"
-    android:padding="16dp">
+    android:background="@drawable/fox_gradient_background">
 
-    <!-- Заголовок -->
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
+    <!-- Контейнер для центральных элементов -->
+    <LinearLayout
+        android:id="@+id/centerContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Главная"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:textColor="@color/fox_dark_orange"
-        android:paddingBottom="8dp" />
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
 
-    <!-- Подзаголовок -->
-    <TextView
-        android:id="@+id/sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Мои встречи"
-        android:textSize="20sp"
-        android:textColor="@color/fox_light_orange"
-        android:paddingBottom="24dp" />
+        <!-- Заголовок -->
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Главная"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/fox_dark_orange"
+            android:paddingBottom="8dp" />
 
-    <!-- Разделитель -->
-    <View
+        <!-- Подзаголовок -->
+        <TextView
+            android:id="@+id/sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Мои встречи"
+            android:textSize="20sp"
+            android:textColor="@color/fox_light_orange"
+            android:paddingBottom="24dp" />
+
+        <!-- Разделитель -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/fox_light_orange"
+            android:alpha="0.5"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Кнопка: Создать встречу -->
+        <Button
+            android:id="@+id/add"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/fox_orange"
+            android:text="Создать встречу"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <!-- Нижняя панель навигации -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/fox_light_orange"
-        android:alpha="0.5"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/fox_dark_orange"
+        android:paddingTop="4dp"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@color/white"
+        app:itemTextColor="@color/white"
+        app:itemRippleColor="@android:color/transparent"
+        app:itemActiveIndicatorStyle="@null"
+        app:itemIconSize="24dp"
+        app:itemPaddingTop="6dp"
+        app:itemPaddingBottom="6dp"
+        app:menu="@menu/bottom_nav_menu" />
 
-    <!-- Кнопка: Создать встречу -->
-    <Button
-        android:id="@+id/add"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/fox_orange"
-        android:text="Создать встречу"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:padding="12dp" />
+</RelativeLayout>
 
-    <!-- Кнопка: Личный кабинет -->
-    <Button
-        android:id="@+id/openLkButton"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:backgroundTint="@color/fox_orange"
-        android:text="Личный кабинет"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:padding="12dp" />
-
-    <!-- Пространство для центрирования элементов -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- Подпись -->
-    
-</LinearLayout>

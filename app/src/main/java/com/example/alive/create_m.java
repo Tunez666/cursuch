@@ -2,22 +2,34 @@ package com.example.alive;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.Calendar;
+import java.util.List;
 
 public class create_m extends AppCompatActivity {
 
+    private static final String TAG = "create_m";
     private DatabaseHelper dbHelper;
     private TextView dateField, timeField;
+    private BottomNavigationView bottomNavigationView;
+    private Spinner categorySpinner;
+    private Spinner eventSpinner;
+    private List<String> categories;
+    private List<String> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +39,15 @@ public class create_m extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
 
         // Найдем элементы макета
-        TextView nameField = findViewById(R.id.namee);
-        TextView placeField = findViewById(R.id.place);
+        EditText nameField = findViewById(R.id.namee);
+        EditText placeField = findViewById(R.id.place);
         dateField = findViewById(R.id.datee);
         timeField = findViewById(R.id.timee);
-        TextView descField = findViewById(R.id.desc);
+        EditText descField = findViewById(R.id.desc);
         Button createButton = findViewById(R.id.cr_m);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        categorySpinner = findViewById(R.id.category_spinner);
+        eventSpinner = findViewById(R.id.event_spinner);
 
         // Обработка выбора даты
         dateField.setOnClickListener(v -> showDatePicker());
@@ -58,6 +73,33 @@ public class create_m extends AppCompatActivity {
                     Toast.makeText(this, "Ошибка при создании встречи", Toast.LENGTH_SHORT).show();
                 }
             }
+        });
+
+        setupBottomNavigation();
+        loadCategoriesAndEvents();
+        setupSpinners();
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(create_m.this, glavnay.class));
+                return true;
+            } else if (itemId == R.id.nav_friends) {
+                startActivity(new Intent(create_m.this, FriendsListActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_create) {
+                // Уже на странице создания
+                return true;
+            } else if (itemId == R.id.nav_md) {
+                startActivity(new Intent(create_m.this, md.class));
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                startActivity(new Intent(create_m.this, lk.class));
+                return true;
+            }
+            return false;
         });
     }
 
@@ -85,43 +127,87 @@ public class create_m extends AppCompatActivity {
     }
 
     private boolean addMeetingToDatabase(String name, String date, String time, String place, String description) {
-        SQLiteDatabase database = dbHelper.getWritableDatabase();
-
-        // Преобразуем дату и время в метку времени
         long timestamp = convertToTimestamp(date, time);
         if (timestamp == -1) {
             Toast.makeText(this, "Некорректный формат даты или времени", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_NAME, name);
-        values.put(DatabaseHelper.COLUMN_DATE, timestamp); // Вставляем метку времени
-        values.put(DatabaseHelper.COLUMN_PLACE, place);
-        values.put(DatabaseHelper.COLUMN_DESC, description);
-        values.put(DatabaseHelper.COLUMN_TIME, time); // Вставляем время
+        if (categorySpinner.getSelectedItem() == null || eventSpinner.getSelectedItem() == null) {
+            Toast.makeText(this, "Пожалуйста, выберите категорию и событие", Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
-        long result = database.insert(DatabaseHelper.TABLE_MEET, null, values);
-        return result != -1; // Проверяем, успешно ли выполнена вставка
+        String selectedCategory = categorySpinner.getSelectedItem().toString();
+        String selectedEvent = eventSpinner.getSelectedItem().toString();
+
+        long categoryId = dbHelper.getCategoryId(selectedCategory);
+        long eventId = dbHelper.getEventId(selectedEvent);
+
+        if (categoryId == -1 || eventId == -1) {
+            Toast.makeText(this, "Ошибка при получении ID категории или события", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        long userId = getCurrentUserId();
+
+        Log.d(TAG, "Попытка добавить встречу в базу данных");
+        Log.d(TAG, "Имя: " + name + ", Дата: " + date + ", Время: " + time + ", Место: " + place + ", Описание: " + description);
+        Log.d(TAG, "ID пользователя: " + userId + ", ID категории: " + categoryId + ", ID события: " + eventId);
+        dbHelper.addMeet(name, timestamp, time, place, description, userId, categoryId, eventId);
+        Log.d(TAG, "Встреча успешно добавлена в базу данных");
+        return true;
     }
 
     private long convertToTimestamp(String date, String time) {
         try {
-            // Объединяем дату и время в одну строку
-            String dateTime = date + " " + time; // Формат: "дд-ММ-гггг чч:мм"
-
-            // Используем правильный формат
+            String dateTime = date + " " + time;
             java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
             java.util.Date parsedDate = format.parse(dateTime);
-
-            // Преобразуем в миллисекунды и делим на 1000, чтобы получить секунды
-            return parsedDate.getTime() / 1000; // Возвращаем секунды
+            return parsedDate.getTime() / 1000;
         } catch (Exception e) {
-            Log.e("CreateMeeting", "Ошибка преобразования даты/времени: " + e.getMessage());
-            return -1; // Если ошибка, возвращаем -1
+            Log.e(TAG, "Ошибка преобразования даты/времени: " + e.getMessage());
+            return -1;
         }
     }
 
+    private void loadCategoriesAndEvents() {
+        categories = dbHelper.getAllCategories();
+        events = dbHelper.getAllEvents();
+
+        if (categories.isEmpty()) {
+            dbHelper.addCategory("Рабочая");
+            dbHelper.addCategory("Дружеская");
+            dbHelper.addCategory("Школьная");
+            dbHelper.addCategory("Студенческая");
+            categories = dbHelper.getAllCategories();
+        }
+        if (events.isEmpty()) {
+            dbHelper.addEvent("День рождения");
+            dbHelper.addEvent("Прогулка");
+            dbHelper.addEvent("Созвон");
+            dbHelper.addEvent("Совещание");
+            dbHelper.addEvent("Вечеринка");
+            events = dbHelper.getAllEvents();
+        }
+    }
+
+    private void setupSpinners() {
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categorySpinner.setAdapter(categoryAdapter);
+
+        ArrayAdapter<String> eventAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, events);
+        eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        eventSpinner.setAdapter(eventAdapter);
+    }
+
+    private long getCurrentUserId() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        long userId = prefs.getLong("currentUserId", -1);
+        Log.d(TAG, "Получен ID пользователя: " + userId);
+        return userId;
+    }
 
     @Override
     protected void onDestroy() {
@@ -129,3 +215,4 @@ public class create_m extends AppCompatActivity {
         super.onDestroy();
     }
 }
+

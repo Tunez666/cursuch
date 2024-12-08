@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,21 +14,21 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class lk extends AppCompatActivity {
     private static final String TAG = "LkActivity";
-    private Button dBut;
-    private Button debug_m;
-    private Button addFriendButton;
-    private Button viewFriendsButton;
-    private Button logoutButton;
-    private Button changeAvatarButton;
+
+
+    private FloatingActionButton settingsButton;
     private CircleImageView profileImageView;
     private TextView userNameTextView;
     private DatabaseHelper databaseHelper;
     private long userId;
+    private BottomNavigationView bottomNavigationView;
 
     // Новый лаунчер для выбора изображения
     private ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
@@ -65,63 +64,47 @@ public class lk extends AppCompatActivity {
             return; // Если ID не найден, не продолжать выполнение
         }
 
-        dBut = findViewById(R.id.deug);
-        debug_m = findViewById(R.id.d_m);
-        addFriendButton = findViewById(R.id.addFriendButton);
-        viewFriendsButton = findViewById(R.id.viewFriendsButton);
-        logoutButton = findViewById(R.id.logoutButton);
-        changeAvatarButton = findViewById(R.id.changeAvatarButton);
+
+
         profileImageView = findViewById(R.id.profileImageView);
         userNameTextView = findViewById(R.id.userNameTextView);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        settingsButton = findViewById(R.id.settingsButton);
 
         loadUserName();
         loadUserAvatar();
         databaseHelper.logAllUsers();
 
-        dBut.setOnClickListener(v -> {
-            Intent intent = new Intent(lk.this, user_list.class);
+        setupBottomNavigation();
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(lk.this, settings.class);
             startActivity(intent);
         });
-
-        debug_m.setOnClickListener(v -> {
-            Intent intent = new Intent(lk.this, md.class);
-            startActivity(intent);
-        });
-
-        addFriendButton.setOnClickListener(v -> {
-            // Передаем userId в AddFriendActivity
-            Intent intent = new Intent(lk.this, AddFriendActivity.class);
-            intent.putExtra("user_id", userId); // Передаем ID пользователя
-            startActivity(intent);
-        });
-
-        viewFriendsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(lk.this, FriendsListActivity.class);
-            startActivity(intent);
-        });
-
-        logoutButton.setOnClickListener(view -> {
-            SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear();
-            editor.apply();
-
-            Toast.makeText(lk.this, "Вы вышли из аккаунта", Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(lk.this, Login.class);
-            startActivity(intent);
-            finish();
-        });
-
-        changeAvatarButton.setOnClickListener(v -> openGallery());
     }
 
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/*");
-        galleryLauncher.launch(intent);
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(lk.this, glavnay.class));
+                return true;
+            } else if (itemId == R.id.nav_friends) {
+                startActivity(new Intent(lk.this, FriendsListActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_create) {
+                startActivity(new Intent(lk.this, create_m.class));
+                return true;
+            } else if (itemId == R.id.nav_md) {
+                startActivity(new Intent(lk.this, md.class));
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                // Уже на странице профиля
+                return true;
+            }
+            return false;
+        });
     }
+
 
     private void loadUserAvatar() {
         String avatarPath = databaseHelper.getUserAvatar(userId);
@@ -152,3 +135,4 @@ public class lk extends AppCompatActivity {
         }
     }
 }
+

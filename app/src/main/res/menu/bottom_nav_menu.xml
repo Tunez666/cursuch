@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav_home"
+        android:title="Главная" />
+    <item
+        android:id="@+id/nav_friends"
+        android:title="Друзья" />
+    <item
+        android:id="@+id/nav_create"
+        android:title="+" />
+    <item
+        android:id="@+id/nav_md"
+        android:title="Встречи" />
+    <item
+        android:id="@+id/nav_profile"
+        android:title="Профиль" />
+</menu>
+

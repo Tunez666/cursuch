@@ -37,15 +37,14 @@ public class Login extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        // Проверяем, сохранен ли ID пользователя
         SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        long savedUserId = preferences.getLong("userId", -1);
+        long savedUserId = preferences.getLong("currentUserId", -1); // Исправлено имя ключа
 
         if (savedUserId != -1) {
             Log.d(TAG, "Найден сохраненный ID пользователя: " + savedUserId);
             Toast.makeText(this, "Добро пожаловать обратно!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Login.this, glavnay.class);
-            startActivity(intent);
-            finish();
+            navigateToMainScreen();
         }
 
         loginButton.setOnClickListener(v -> loginUser());
@@ -74,7 +73,7 @@ public class Login extends AppCompatActivity {
         String selection = DatabaseHelper.COLUMN_EMAIL + " = ?";
         String[] selectionArgs = { email };
 
-        Cursor cursor = db.query(
+        try (Cursor cursor = db.query(
                 DatabaseHelper.TABLE_USERS,
                 projection,
                 selection,
@@ -82,31 +81,35 @@ public class Login extends AppCompatActivity {
                 null,
                 null,
                 null
-        );
+        )) {
+            if (cursor.moveToFirst()) {
+                String storedPassword = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PASSWORD));
+                if (password.equals(storedPassword)) {
+                    long userId = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
+                    Log.d(TAG, "Вход выполнен успешно. ID пользователя: " + userId);
+                    Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
 
-        if (cursor.moveToFirst()) {
-            String storedPassword = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PASSWORD));
-            if (password.equals(storedPassword)) {
-                long userId = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
-                Log.d(TAG, "Вход выполнен успешно. ID пользователя: " + userId);
-                Toast.makeText(this, "Вход выполнен успешно!", Toast.LENGTH_SHORT).show();
+                    // Сохраняем ID пользователя в SharedPreferences
+                    SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putLong("currentUserId", userId); // Исправлено имя ключа
+                    editor.apply();
+                    Log.d(TAG, "ID пользователя сохранен в SharedPreferences: " + userId);
 
-                SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putLong("userId", userId);
-                editor.apply();
-                Log.d(TAG, "ID пользователя сохранен в SharedPreferences: " + userId);
-
-                Intent intent = new Intent(Login.this, glavnay.class);
-                startActivity(intent);
-                finish();
+                    navigateToMainScreen();
+                } else {
+                    Toast.makeText(this, "Неверный пароль", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(this, "Неверный пароль", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Пользователь не найден", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            Toast.makeText(this, "Пользователь не найден", Toast.LENGTH_SHORT).show();
         }
-        cursor.close();
+    }
+
+    private void navigateToMainScreen() {
+        Intent intent = new Intent(Login.this, glavnay.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -115,4 +118,3 @@ public class Login extends AppCompatActivity {
         super.onDestroy();
     }
 }
-
