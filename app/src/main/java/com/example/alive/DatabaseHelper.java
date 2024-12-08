@@ -14,7 +14,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "UserDatabase.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 5; // Увеличиваем версию базы данных
 
     // Константы для таблиц и колонок
     public static final String TABLE_USERS = "users";
@@ -23,7 +23,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_PASSWORD = "password";
     public static final String COLUMN_AVATAR = "avatar";
-    public static final String COLUMN_ABOUT = "about";
 
     public static final String TABLE_MEET = "meet";
     public static final String COLUMN_ID_M = "id_m";
@@ -31,31 +30,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_PLACE = "place";
-    public static final String COLUMN_DESC = "descr";
+    public static final String COLUMN_DESC = "descr"; // Исправлено название константы
     public static final String COLUMN_USER_ID = "user_id";
 
     public static final String TABLE_FRIENDS = "friends";
     public static final String COLUMN_FRIENDSHIP_ID = "friendship_id";
-    public static final String COLUMN_USER_ID_FRIENDS = "user_id";
+    public static final String COLUMN_USER_ID_FRIENDS = "user_id"; // Added to avoid naming conflict
     public static final String COLUMN_FRIEND_ID = "friend_id";
 
-    public static final String TABLE_CATEGORIES = "categories";
-    public static final String COLUMN_CATEGORY_ID = "category_id";
-    public static final String COLUMN_CATEGORY_NAME = "name_c";
-
-    public static final String TABLE_EVENTS = "events";
-    public static final String COLUMN_EVENT_ID = "event_id";
-    public static final String COLUMN_EVENT_NAME = "name_e";
-
-    // SQL запросы для создания таблиц
     private static final String DATABASE_CREATE_USERS = "CREATE TABLE "
             + TABLE_USERS + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_USERNAME + " TEXT NOT NULL, "
             + COLUMN_EMAIL + " TEXT NOT NULL, "
             + COLUMN_PASSWORD + " TEXT NOT NULL, "
-            + COLUMN_AVATAR + " TEXT, "
-            + COLUMN_ABOUT + " TEXT);";
+            + COLUMN_AVATAR + " TEXT);";
 
     private static final String DATABASE_CREATE_MEET = "CREATE TABLE "
             + TABLE_MEET + "("
@@ -66,11 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_PLACE + " TEXT NOT NULL, "
             + COLUMN_DESC + " TEXT NOT NULL, "
             + COLUMN_USER_ID + " INTEGER NOT NULL, "
-            + COLUMN_CATEGORY_ID + " INTEGER, "
-            + COLUMN_EVENT_ID + " INTEGER, "
-            + "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), "
-            + "FOREIGN KEY(" + COLUMN_CATEGORY_ID + ") REFERENCES " + TABLE_CATEGORIES + "(" + COLUMN_CATEGORY_ID + "), "
-            + "FOREIGN KEY(" + COLUMN_EVENT_ID + ") REFERENCES " + TABLE_EVENTS + "(" + COLUMN_EVENT_ID + "));";
+            + "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "));"; // Updated to include user_id
 
     private static final String DATABASE_CREATE_FRIENDS = "CREATE TABLE "
             + TABLE_FRIENDS + "("
@@ -79,16 +64,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_FRIEND_ID + " INTEGER NOT NULL, "
             + "FOREIGN KEY(" + COLUMN_USER_ID_FRIENDS + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), "
             + "FOREIGN KEY(" + COLUMN_FRIEND_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "));";
-
-    private static final String DATABASE_CREATE_CATEGORIES = "CREATE TABLE "
-            + TABLE_CATEGORIES + "("
-            + COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COLUMN_CATEGORY_NAME + " TEXT);";
-
-    private static final String DATABASE_CREATE_EVENTS = "CREATE TABLE "
-            + TABLE_EVENTS + "("
-            + COLUMN_EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COLUMN_EVENT_NAME + " TEXT);";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -100,8 +75,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             database.execSQL(DATABASE_CREATE_USERS);
             database.execSQL(DATABASE_CREATE_MEET);
             database.execSQL(DATABASE_CREATE_FRIENDS);
-            database.execSQL(DATABASE_CREATE_CATEGORIES);
-            database.execSQL(DATABASE_CREATE_EVENTS);
             Log.i(TAG, "Таблицы успешно созданы");
         } catch (Exception e) {
             Log.e(TAG, "Ошибка при создании таблиц: " + e.getMessage());
@@ -124,59 +97,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TABLE_MEET + " ADD COLUMN " + COLUMN_USER_ID + " INTEGER DEFAULT 0;");
             Log.i(TAG, "Добавлен столбец user_id в таблицу meet");
         }
-
-        Log.i(TAG, "Обновление базы данных с версии " + oldVersion + " до " + newVersion);
-        if (oldVersion < 6) {
-            // Добавляем колонку "о себе" в таблицу пользователей
-            db.execSQL("ALTER TABLE " + TABLE_USERS + " ADD COLUMN " + COLUMN_ABOUT + " TEXT;");
-
-            // Создаем таблицу категорий
-            db.execSQL(DATABASE_CREATE_CATEGORIES);
-
-            // Создаем таблицу событий
-            db.execSQL(DATABASE_CREATE_EVENTS);
-
-            // Создаем временную таблицу для сохранения данных
-            db.execSQL("CREATE TEMPORARY TABLE meet_backup(" +
-                    "id_m INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT NOT NULL, " +
-                    "date INTEGER NOT NULL, " +
-                    "time TEXT NOT NULL, " +
-                    "place TEXT NOT NULL, " +
-                    "descr TEXT NOT NULL, " +
-                    "user_id INTEGER NOT NULL);");
-
-            // Копируем данные во временную таблицу
-            db.execSQL("INSERT INTO meet_backup SELECT * FROM " + TABLE_MEET + ";");
-
-            // Удаляем старую таблицу
-            db.execSQL("DROP TABLE " + TABLE_MEET + ";");
-
-            // Создаем новую таблицу meet с внешними ключами
-            db.execSQL("CREATE TABLE " + TABLE_MEET + "(" +
-                    COLUMN_ID_M + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NAME + " TEXT NOT NULL, " +
-                    COLUMN_DATE + " INTEGER NOT NULL, " +
-                    COLUMN_TIME + " TEXT NOT NULL, " +
-                    COLUMN_PLACE + " TEXT NOT NULL, " +
-                    COLUMN_DESC + " TEXT NOT NULL, " +
-                    COLUMN_USER_ID + " INTEGER NOT NULL, " +
-                    COLUMN_CATEGORY_ID + " INTEGER, " +
-                    COLUMN_EVENT_ID + " INTEGER, " +
-                    "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), " +
-                    "FOREIGN KEY(" + COLUMN_CATEGORY_ID + ") REFERENCES " + TABLE_CATEGORIES + "(" + COLUMN_CATEGORY_ID + "), " +
-                    "FOREIGN KEY(" + COLUMN_EVENT_ID + ") REFERENCES " + TABLE_EVENTS + "(" + COLUMN_EVENT_ID + "));");
-
-            // Восстанавливаем данные из временной таблицы
-            db.execSQL("INSERT INTO " + TABLE_MEET +
-                    " (id_m, name, date, time, place, descr, user_id) " +
-                    "SELECT id_m, name, date, time, place, descr, user_id FROM meet_backup;");
-
-            // Удаляем временную таблицу
-            db.execSQL("DROP TABLE meet_backup;");
-
-            Log.i(TAG, "Обновление до версии 6 выполнено успешно");
-        }
     }
 
     @Override
@@ -185,8 +105,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRIENDS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENTS);
         onCreate(db);
     }
 
@@ -317,7 +235,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.i(TAG, "Друг успешно добавлен");
         }
     }
-    public void addMeet(String name, long timestamp, String time, String place, String description, long userId, long categoryId, long eventId) {
+    public void addMeet(String name, long timestamp, String time, String place, String description, long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
@@ -326,8 +244,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PLACE, place);
         values.put(COLUMN_DESC, description);
         values.put(COLUMN_USER_ID, userId);
-        values.put(COLUMN_CATEGORY_ID, categoryId);
-        values.put(COLUMN_EVENT_ID, eventId);
         long result = db.insert(TABLE_MEET, null, values);
         if (result == -1) {
             Log.e(TAG, "Не удалось добавить встречу");
@@ -411,74 +327,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEET, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
     }
-
-    public void addCategory(String name) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_CATEGORY_NAME, name);
-        db.insert(TABLE_CATEGORIES, null, values);
-    }
-
-    public void addEvent(String name) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_EVENT_NAME, name);
-        db.insert(TABLE_EVENTS, null, values);
-    }
-
-    public List<String> getAllCategories() {
-        List<String> categories = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_CATEGORIES, new String[]{COLUMN_CATEGORY_NAME}, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                categories.add(cursor.getString(0));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return categories;
-    }
-
-    public List<String> getAllEvents() {
-        List<String> events = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_EVENTS, new String[]{COLUMN_EVENT_NAME}, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                events.add(cursor.getString(0));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return events;
-    }
-
-    public long getCategoryId(String categoryName) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_CATEGORIES, new String[]{COLUMN_CATEGORY_ID},
-                COLUMN_CATEGORY_NAME + "=?", new String[]{categoryName},
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            long id = cursor.getLong(0);
-            cursor.close();
-            return id;
-        }
-        cursor.close();
-        return -1;
-    }
-
-    public long getEventId(String eventName) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_EVENTS, new String[]{COLUMN_EVENT_ID},
-                COLUMN_EVENT_NAME + "=?", new String[]{eventName},
-                null, null, null);
-        if (cursor.moveToFirst()) {
-            long id = cursor.getLong(0);
-            cursor.close();
-            return id;
-        }
-        cursor.close();
-        return -1;
-    }
-
 }
 
