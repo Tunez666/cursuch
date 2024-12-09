@@ -445,6 +445,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
     }
 
+    public void updateEmail(long userId, String newEmail) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EMAIL, newEmail); // Указываем правильный столбец
+        int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
+        Log.d(TAG, "Обновлен email для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
+    }
+
+
     public Cursor getMeetingsForUser(long userId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_MEET + " WHERE " + COLUMN_USER_ID + " = ? OR " + COLUMN_USER_ID + " IS NULL OR " + COLUMN_USER_ID + " = 0 ORDER BY " + COLUMN_DATE + " DESC";
@@ -454,5 +463,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEET, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
     }
+
+    @SuppressLint("Range")
+    public String getUserEmail(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String email = null;
+
+        // Строим запрос
+        String query = "SELECT " + COLUMN_EMAIL + " FROM " + TABLE_USERS + " WHERE " + COLUMN_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            email = cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL));
+        }
+
+        cursor.close();
+        db.close();
+
+        return email;
+    }
+    @SuppressLint("Range")
+    public String getUserPassword(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String password = null;
+
+        // Строим запрос
+        String query = "SELECT " + COLUMN_PASSWORD + " FROM " + TABLE_USERS + " WHERE " + COLUMN_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            password = cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD));
+        }
+
+
+        cursor.close();
+        db.close();
+
+        return password;
+    }
+
+
 }
 

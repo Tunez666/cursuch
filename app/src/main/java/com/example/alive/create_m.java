@@ -6,9 +6,11 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
@@ -63,7 +65,9 @@ public class create_m extends AppCompatActivity {
         eventField = findViewById(R.id.eventField);
         categoryField = findViewById(R.id.categoryField);
         friendsSpinner = findViewById(R.id.friendsSpinner);
-        loadFriends();
+
+        loadFriends();  // Загружаем друзей
+
         // Set up click listeners
         eventField.setOnClickListener(v -> showEventPicker());
         categoryField.setOnClickListener(v -> showCategoryPicker());
@@ -76,22 +80,7 @@ public class create_m extends AppCompatActivity {
             String date = dateField.getText().toString().trim();
             String time = timeField.getText().toString().trim();
             String description = descField.getText().toString().trim();
-            friendsSpinner = findViewById(R.id.friendsSpinner);
-            loadFriends();
 
-            friendsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (position >= 0 && position < allFriendIds.size()) {
-                        selectedFriendIds.add(allFriendIds.get(position));
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    selectedFriendIds.clear();
-                }
-            });
             if (name.isEmpty() || place.isEmpty() || date.isEmpty() || time.isEmpty() || description.isEmpty()) {
                 Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show();
             } else {
@@ -107,6 +96,46 @@ public class create_m extends AppCompatActivity {
         setupBottomNavigation();
     }
 
+    private void loadFriends() {
+        long currentUserId = getCurrentUserId();
+        List<String> friendNames = dbHelper.getFriends(currentUserId);
+        allFriendIds.clear();
+        allFriendIds.addAll(dbHelper.getFriendIds(currentUserId));
+
+        // Создаем адаптер для Spinner с кастомизированным стилем
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, friendNames) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+
+                // Устанавливаем цвет текста и стиль
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(16f);
+                textView.setPadding(16, 16, 16, 16);
+                view.setBackgroundResource(R.drawable.fox_edit_text_background);  // Фон как у других полей
+
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+
+                // Применяем тот же стиль для выпадающего списка
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(16f);
+                textView.setPadding(16, 16, 16, 16);
+
+                return view;
+            }
+        };
+
+        // Устанавливаем адаптер для Spinner
+        friendsSpinner.setAdapter(adapter);
+    }
+
     private long convertToTimestamp(String date, String time) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
@@ -116,16 +145,7 @@ public class create_m extends AppCompatActivity {
             return -1;
         }
     }
-    private void loadFriends() {
-        long currentUserId = getCurrentUserId();
-        List<String> friendNames = dbHelper.getFriends(currentUserId);
-        allFriendIds.clear();
-        allFriendIds.addAll(dbHelper.getFriendIds(currentUserId));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, friendNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        friendsSpinner.setAdapter(adapter);
-    }
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
@@ -161,7 +181,7 @@ public class create_m extends AppCompatActivity {
                 .setTitle("Выберите событие")
                 .setItems(events, (dialog, which) -> {
                     eventField.setText(events[which]);
-                    selectedEventId = which + 1; // Пример: ID события = индекс + 1
+                    selectedEventId = which + 1;  // Пример: ID события = индекс + 1
                 })
                 .show();
     }
@@ -172,7 +192,7 @@ public class create_m extends AppCompatActivity {
                 .setTitle("Выберите категорию")
                 .setItems(categories, (dialog, which) -> {
                     categoryField.setText(categories[which]);
-                    selectedCategoryId = which + 1; // Пример: ID категории = индекс + 1
+                    selectedCategoryId = which + 1;  // Пример: ID категории = индекс + 1
                 })
                 .show();
     }
@@ -238,4 +258,5 @@ public class create_m extends AppCompatActivity {
         super.onDestroy();
     }
 }
+
 

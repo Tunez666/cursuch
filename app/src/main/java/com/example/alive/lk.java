@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,13 +24,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class lk extends AppCompatActivity {
     private static final String TAG = "LkActivity";
 
-
     private FloatingActionButton settingsButton;
     private CircleImageView profileImageView;
-    private TextView userNameTextView;
+    private TextView userNameTextView, userEmailTextView;
+    private EditText userPasswordTextView;
     private DatabaseHelper databaseHelper;
     private long userId;
     private BottomNavigationView bottomNavigationView;
+    private boolean isPasswordVisible = false;
 
     // Новый лаунчер для выбора изображения
     private ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
@@ -58,20 +61,20 @@ public class lk extends AppCompatActivity {
         userId = prefs.getLong("userId", -1);
         Log.d(TAG, "ID пользователя из SharedPreferences: " + userId);
 
-        // Проверка на случай если userId не был найден в SharedPreferences
         if (userId == -1) {
             Toast.makeText(this, "Ошибка: ID пользователя не найден", Toast.LENGTH_SHORT).show();
-            return; // Если ID не найден, не продолжать выполнение
+            return;
         }
 
-
-
+        // Инициализация UI элементов
         profileImageView = findViewById(R.id.profileImageView);
         userNameTextView = findViewById(R.id.userNameTextView);
+        userEmailTextView = findViewById(R.id.userEmailTextView);
+        userPasswordTextView = findViewById(R.id.userPasswordTextView);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         settingsButton = findViewById(R.id.settingsButton);
 
-        loadUserName();
+        loadUserData();
         loadUserAvatar();
         databaseHelper.logAllUsers();
 
@@ -80,6 +83,27 @@ public class lk extends AppCompatActivity {
             Intent intent = new Intent(lk.this, settings.class);
             startActivity(intent);
         });
+
+        // Добавим кнопку для отображения/скрытия пароля
+        Button togglePasswordVisibilityButton = findViewById(R.id.togglePasswordVisibilityButton);
+        togglePasswordVisibilityButton.setOnClickListener(v -> {
+            if (isPasswordVisible) {
+                // Если пароль виден, скрываем его
+                userPasswordTextView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                togglePasswordVisibilityButton.setText("Показать пароль");
+            } else {
+                // Если пароль скрыт, показываем его
+                userPasswordTextView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                togglePasswordVisibilityButton.setText("Скрыть пароль");
+            }
+            // Меняем состояние
+            isPasswordVisible = !isPasswordVisible;
+
+            // Устанавливаем курсор в конец текста
+            userPasswordTextView.setSelection(userPasswordTextView.getText().length());
+        });
+
+
     }
 
     private void setupBottomNavigation() {
@@ -105,7 +129,6 @@ public class lk extends AppCompatActivity {
         });
     }
 
-
     private void loadUserAvatar() {
         String avatarPath = databaseHelper.getUserAvatar(userId);
         if (avatarPath != null && !avatarPath.isEmpty()) {
@@ -119,9 +142,12 @@ public class lk extends AppCompatActivity {
         }
     }
 
-    private void loadUserName() {
+    private void loadUserData() {
         if (userId != -1) {
             String userName = databaseHelper.getUserName(userId);
+            String userEmail = databaseHelper.getUserEmail(userId);
+            String userPassword = databaseHelper.getUserPassword(userId);
+
             Log.d(TAG, "Имя пользователя из базы данных: " + userName);
             if (userName != null && !userName.isEmpty()) {
                 userNameTextView.setText(userName);
@@ -129,10 +155,21 @@ public class lk extends AppCompatActivity {
                 userNameTextView.setText("Пользователь");
                 Log.e(TAG, "Имя пользователя пустое или null");
             }
+
+            if (userEmail != null && !userEmail.isEmpty()) {
+                userEmailTextView.setText(userEmail);
+            } else {
+                userEmailTextView.setText("Нет почты");
+            }
+
+            if (userPassword != null && !userPassword.isEmpty()) {
+                userPasswordTextView.setText(userPassword);
+            } else {
+                userPasswordTextView.setText("Нет пароля");
+            }
         } else {
             Log.e(TAG, "Неверный ID пользователя: " + userId);
             userNameTextView.setText("Пользователь");
         }
     }
 }
-

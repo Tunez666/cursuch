@@ -8,15 +8,13 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/fox_ic"
+        android:icon="@drawable/fox2"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/fox_ic"
+        android:roundIcon="@drawable/fox2"
         android:supportsRtl="true"
         android:theme="@style/Theme.Alive"
         tools:targetApi="31">
-        <activity
-            android:name=".meetdata"
-            android:exported="false" />
+
         <activity
             android:name=".settings"
             android:exported="false" />

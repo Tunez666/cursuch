@@ -13,7 +13,7 @@
         android:id="@+id/logoImageView"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:src="@drawable/fox_logo"
+        android:src="@drawable/fox2"
         android:layout_marginBottom="24dp"/>
 
     <TextView

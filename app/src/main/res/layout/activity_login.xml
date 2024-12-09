@@ -15,7 +15,7 @@
         android:layout_width="264dp"
         android:layout_height="115dp"
         android:layout_marginBottom="24dp"
-        android:src="@drawable/fox_logo" />
+        android:src="@drawable/fox2" />
 
     <TextView
         android:id="@+id/titleTextView"

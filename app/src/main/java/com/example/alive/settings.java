@@ -28,10 +28,11 @@ public class settings extends AppCompatActivity {
     private TextView userNameTextView;
     private EditText newUsernameEditText;
     private EditText newPasswordEditText;
+    private EditText newEmailEditText;
+
     private DatabaseHelper databaseHelper;
     private long userId;
-    private Button dBut;
-    private Button debug_m;
+
     private Button backButton; // Added back button declaration
 
     private ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
@@ -66,8 +67,9 @@ public class settings extends AppCompatActivity {
         userNameTextView = findViewById(R.id.userNameTextView);
         newUsernameEditText = findViewById(R.id.newUsernameEditText);
         newPasswordEditText = findViewById(R.id.newPasswordEditText);
-        dBut = findViewById(R.id.deug);
-        debug_m = findViewById(R.id.d_m);
+        newEmailEditText = findViewById(R.id.newEmailEditText);
+
+
         backButton = findViewById(R.id.backButton); // Added back button initialization
 
         loadUserName();
@@ -75,15 +77,7 @@ public class settings extends AppCompatActivity {
 
         changeAvatarButton.setOnClickListener(v -> openGallery());
 
-        dBut.setOnClickListener(v -> {
-            Intent intent = new Intent(settings.this, user_list.class);
-            startActivity(intent);
-        });
 
-        debug_m.setOnClickListener(v -> {
-            Intent intent = new Intent(settings.this, md.class);
-            startActivity(intent);
-        });
 
         logoutButton.setOnClickListener(view -> {
             SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
@@ -147,6 +141,7 @@ public class settings extends AppCompatActivity {
     private void saveChanges() {
         String newUsername = newUsernameEditText.getText().toString().trim();
         String newPassword = newPasswordEditText.getText().toString().trim();
+        String newEmail = newEmailEditText.getText().toString().trim(); // Добавляем строку для получения нового email
 
         boolean changes = false;
 
@@ -160,7 +155,11 @@ public class settings extends AppCompatActivity {
             databaseHelper.updatePassword(userId, newPassword);
             changes = true;
         }
-
+        if (!TextUtils.isEmpty(newEmail)) {
+            databaseHelper.updateEmail(userId, newEmail);
+            changes = true;
+            Toast.makeText(this, "Email успешно обновлен", Toast.LENGTH_SHORT).show();
+        }
         if (changes) {
             Toast.makeText(this, "Изменения сохранены", Toast.LENGTH_SHORT).show();
             newUsernameEditText.setText("");

@@ -16,6 +16,12 @@
         android:gravity="center_horizontal"
         android:padding="16dp">
 
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="264dp"
+            android:layout_height="115dp"
+            android:layout_marginBottom="24dp"
+            android:src="@drawable/fox2" />
         <!-- Заголовок -->
         <TextView
             android:id="@+id/titleTextView"
@@ -32,7 +38,7 @@
             android:id="@+id/sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Мои встречи"
+            android:text="Ближайшие встречи"
             android:textSize="20sp"
             android:textColor="@color/fox_light_orange"
             android:paddingBottom="24dp" />
