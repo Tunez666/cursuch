@@ -8,9 +8,15 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,6 +33,9 @@ public class create_m extends AppCompatActivity {
     private TextView dateField, timeField;
     private BottomNavigationView bottomNavigationView;
     private TextView eventField, categoryField;
+    private Spinner friendsSpinner;
+    private List<Long> selectedFriendIds = new ArrayList<>();
+    private List<Long> allFriendIds = new ArrayList<>();
     private int selectedEventId = -1, selectedCategoryId = -1;
 
     private long getCurrentUserId() {
@@ -53,7 +62,8 @@ public class create_m extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         eventField = findViewById(R.id.eventField);
         categoryField = findViewById(R.id.categoryField);
-
+        friendsSpinner = findViewById(R.id.friendsSpinner);
+        loadFriends();
         // Set up click listeners
         eventField.setOnClickListener(v -> showEventPicker());
         categoryField.setOnClickListener(v -> showCategoryPicker());
@@ -66,7 +76,22 @@ public class create_m extends AppCompatActivity {
             String date = dateField.getText().toString().trim();
             String time = timeField.getText().toString().trim();
             String description = descField.getText().toString().trim();
+            friendsSpinner = findViewById(R.id.friendsSpinner);
+            loadFriends();
 
+            friendsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position >= 0 && position < allFriendIds.size()) {
+                        selectedFriendIds.add(allFriendIds.get(position));
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    selectedFriendIds.clear();
+                }
+            });
             if (name.isEmpty() || place.isEmpty() || date.isEmpty() || time.isEmpty() || description.isEmpty()) {
                 Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show();
             } else {
@@ -91,7 +116,16 @@ public class create_m extends AppCompatActivity {
             return -1;
         }
     }
+    private void loadFriends() {
+        long currentUserId = getCurrentUserId();
+        List<String> friendNames = dbHelper.getFriends(currentUserId);
+        allFriendIds.clear();
+        allFriendIds.addAll(dbHelper.getFriendIds(currentUserId));
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, friendNames);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        friendsSpinner.setAdapter(adapter);
+    }
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
@@ -122,7 +156,6 @@ public class create_m extends AppCompatActivity {
     }
 
     private void showEventPicker() {
-        // Implement event picker dialog
         String[] events = {"День рождения", "Прогулка", "Свидание", "Путешествие"};
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Выберите событие")
@@ -134,7 +167,6 @@ public class create_m extends AppCompatActivity {
     }
 
     private void showCategoryPicker() {
-        // Implement category picker dialog
         String[] categories = {"Рабочая", "Дружеская", "Семейная"};
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Выберите категорию")
@@ -172,42 +204,32 @@ public class create_m extends AppCompatActivity {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         long currentUserId = getCurrentUserId();
 
-        if (currentUserId == -1) {
-            Log.e(TAG, "Error: Unable to get user ID");
-            Toast.makeText(this, "Ошибка: не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+        if (currentUserId == -1) return false;
 
-        if (selectedEventId == -1 || selectedCategoryId == -1) {
-            Log.e(TAG, "Error: Event or category not selected");
-            Toast.makeText(this, "Пожалуйста, выберите событие и категорию", Toast.LENGTH_SHORT).show();
+        // Проверяем, что выбраны категория и событие
+        if (selectedCategoryId == -1 || selectedEventId == -1) {
+            Log.e(TAG, "Ошибка: не выбраны категория или событие");
+            Toast.makeText(this, "Пожалуйста, выберите категорию и событие", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         long timestamp = convertToTimestamp(date, time);
-        if (timestamp == -1) {
-            Log.e(TAG, "Error: Invalid date or time format");
-            Toast.makeText(this, "Некорректный формат даты или времени", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_NAME, name);
         values.put(DatabaseHelper.COLUMN_DATE, timestamp);
+        values.put(DatabaseHelper.COLUMN_TIME, time);
         values.put(DatabaseHelper.COLUMN_PLACE, place);
         values.put(DatabaseHelper.COLUMN_DESC, description);
-        values.put(DatabaseHelper.COLUMN_TIME, time);
-        values.put(DatabaseHelper.COLUMN_ID_E, selectedEventId);
-        values.put(DatabaseHelper.COLUMN_ID_C, selectedCategoryId);
         values.put(DatabaseHelper.COLUMN_USER_ID, currentUserId);
+        values.put(DatabaseHelper.COLUMN_ID_C, selectedCategoryId);  // Убедитесь, что передается ID категории
+        values.put(DatabaseHelper.COLUMN_ID_E, selectedEventId);  // Убедитесь, что передается ID события
 
-        long result = database.insert(DatabaseHelper.TABLE_MEET, null, values);
-        if (result != -1) {
-            Log.d(TAG, "Meeting added successfully for user ID: " + currentUserId);
-        } else {
-            Log.e(TAG, "Failed to add meeting for user ID: " + currentUserId);
+        long meetingId = database.insert(DatabaseHelper.TABLE_MEET, null, values);
+        if (meetingId != -1) {
+            dbHelper.addMeetParticipants(meetingId, selectedFriendIds);
+            return true;
         }
-        return result != -1;
+        return false;
     }
 
     @Override

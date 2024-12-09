@@ -3,11 +3,15 @@ package com.example.alive;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +47,13 @@ public class md extends AppCompatActivity {
         if (currentUserId != -1) {
             displayUserMeetings(currentUserId);
         } else {
-            Toast.makeText(this, "Ошибка: Не удалось получить ID пользователя", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Ошибка: Не удалось получить ID пользователя");
+            Toast.makeText(this, "Ошибка: Не удалось получить ID пользователя. Пожалуйста, войдите снова.", Toast.LENGTH_LONG).show();
+            // Redirect to login activity
+            Intent intent = new Intent(this, Login.class);
+            startActivity(intent);
+            finish();
+            return;
         }
 
         clearMeetingsButton.setOnClickListener(v -> {
@@ -55,7 +65,7 @@ public class md extends AppCompatActivity {
 
     private long getCurrentUserId() {
         SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        long userId = preferences.getLong("currentUserId", -1);
+        long userId = preferences.getLong("userId", -1); // Changed from "currentUserId" to "userId"
         Log.d(TAG, "Получен ID пользователя: " + userId);
         return userId;
     }
@@ -87,9 +97,18 @@ public class md extends AppCompatActivity {
             meetingsList.add("У вас пока нет созданных встреч.");
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, meetingsList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, meetingsList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                textView.setTextColor(Color.BLACK);
+                return view;
+            }
+        };
         meetingsListView.setAdapter(adapter);
     }
+
 
     private void clearUserMeetings(long userId) {
         dbHelper.clearMeetings(userId);

@@ -40,7 +40,8 @@
                     android:layout_height="250dp"
                     android:divider="@android:color/darker_gray"
                     android:dividerHeight="1dp"
-                    android:background="@android:color/white"/>
+                    android:background="@android:color/white"
+                    android:textColor="#000000"/>
 
             </LinearLayout>
 

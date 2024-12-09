@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Alive"
         tools:targetApi="31">
         <activity
+            android:name=".meetdata"
+            android:exported="false" />
+        <activity
             android:name=".settings"
             android:exported="false" />
         <activity

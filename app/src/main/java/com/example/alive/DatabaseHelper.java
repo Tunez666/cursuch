@@ -14,7 +14,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "UserDatabase.db";
-    private static final int DATABASE_VERSION = 9; // Увеличиваем версию базы данных
+    private static final int DATABASE_VERSION = 10; // Увеличиваем версию базы данных
 
     // Константы для таблиц и колонок
     public static final String TABLE_USERS = "users";
@@ -45,7 +45,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_EVENT = "event";
     public static final String COLUMN_ID_E = "id_e";
     public static final String COLUMN_EVENT_NAME = "name_e";
-
+    public static final String TABLE_MEET_PARTICIPANTS = "meet_participants";
+    public static final String COLUMN_MEET_ID = "meet_id";
+    public static final String COLUMN_PARTICIPANT_ID = "participant_id";
     private static final String DATABASE_CREATE_USERS = "CREATE TABLE "
             + TABLE_USERS + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -86,6 +88,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + TABLE_EVENT + "("
             + COLUMN_ID_E + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_EVENT_NAME+ " TEXT NOT NULL);";
+
+    private static final String DATABASE_CREATE_MEET_PARTICIPANTS = "CREATE TABLE "
+            + TABLE_MEET_PARTICIPANTS + "("
+            + COLUMN_MEET_ID + " INTEGER, "
+            + COLUMN_PARTICIPANT_ID + " INTEGER, "
+            + "PRIMARY KEY (" + COLUMN_MEET_ID + ", " + COLUMN_PARTICIPANT_ID + "), "
+            + "FOREIGN KEY(" + COLUMN_MEET_ID + ") REFERENCES " + TABLE_MEET + "(" + COLUMN_ID_M + "), "
+            + "FOREIGN KEY(" + COLUMN_PARTICIPANT_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "));";
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -99,6 +109,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             database.execSQL(DATABASE_CREATE_FRIENDS);
             database.execSQL(DATABASE_CREATE_CATEGORY);
             database.execSQL(DATABASE_CREATE_EVENT);
+            database.execSQL(DATABASE_CREATE_MEET_PARTICIPANTS);
             Log.i(TAG, "Таблицы успешно созданы");
 
             initializeCategories(database);
@@ -146,6 +157,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(DATABASE_CREATE_MEET);
             initializeCategories(db);
             initializeEvents(db);
+        }
+        if (oldVersion < 10) {
+            // Add upgrade logic for version 10 here if needed
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET_PARTICIPANTS);
+            db.execSQL(DATABASE_CREATE_MEET_PARTICIPANTS);
+            Log.i(TAG, "Создана таблица участников встреч");
+            Log.i(TAG, "Обновление до версии 10");
         }
     }
 
@@ -256,6 +274,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
     }
 
+    public void addMeetParticipants(long meetId, List<Long> participantIds) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (Long participantId : participantIds) {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_MEET_ID, meetId);
+                values.put(COLUMN_PARTICIPANT_ID, participantId);
+                long result = db.insert(TABLE_MEET_PARTICIPANTS, null, values);
+                if (result == -1) {
+                    Log.e(TAG, "Не удалось добавить участника " + participantId + " к встрече " + meetId);
+                } else {
+                    Log.d(TAG, "Успешно добавлен участник " + participantId + " к встрече " + meetId);
+                }
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при добавлении участников встречи: " + e.getMessage());
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public long getUserIdByUsername(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT " + COLUMN_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_USERNAME + " = ?";
@@ -314,6 +355,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.i(TAG, "Друг успешно добавлен");
         }
     }
+    @SuppressLint("Range")
+    public List<Long> getFriendIds(long userId) {
+        List<Long> friendIds = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        // Исправленный запрос
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_FRIEND_ID + " FROM " + TABLE_FRIENDS + " WHERE " + COLUMN_USER_ID_FRIENDS + " = ?", new String[]{String.valueOf(userId)});
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                friendIds.add(cursor.getLong(cursor.getColumnIndex(COLUMN_FRIEND_ID)));
+            }
+            cursor.close();
+        }
+        return friendIds;
+    }
     public long addMeet(String name, long date, String time, String place, String desc, long userId, long categoryId, long eventId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -338,27 +393,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Метод для получения списка друзей
     public List<String> getFriends(long userId) {
-        List<String> friends = new ArrayList<>();
+        List<String> friendNames = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-
-        // Запрос для получения имен друзей
         String query = "SELECT u." + COLUMN_USERNAME + " FROM " + TABLE_FRIENDS + " f " +
                 "JOIN " + TABLE_USERS + " u ON f." + COLUMN_FRIEND_ID + " = u." + COLUMN_ID +
                 " WHERE f." + COLUMN_USER_ID_FRIENDS + " = ?";
-
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
-
-        if (cursor.moveToFirst()) {
-            do {
-                String friendName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME));
-                friends.add(friendName);
-            } while (cursor.moveToNext());
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                friendNames.add(cursor.getString(0));
+            }
+            cursor.close();
         }
-        cursor.close();
-        return friends;
+        return friendNames;
     }
-
-
 
     public void clearFriends(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
