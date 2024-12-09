@@ -25,6 +25,7 @@ public class lk extends AppCompatActivity {
     private static final String TAG = "LkActivity";
 
     private FloatingActionButton settingsButton;
+    private FloatingActionButton instructionButton;  // Новая кнопка для перехода на инструкцию
     private CircleImageView profileImageView;
     private TextView userNameTextView, userEmailTextView;
     private EditText userPasswordTextView;
@@ -32,23 +33,6 @@ public class lk extends AppCompatActivity {
     private long userId;
     private BottomNavigationView bottomNavigationView;
     private boolean isPasswordVisible = false;
-
-    // Новый лаунчер для выбора изображения
-    private ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Uri imageUri = result.getData().getData();
-                    if (imageUri != null) {
-                        getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        String imagePath = imageUri.toString();
-                        databaseHelper.updateUserAvatar(userId, imagePath);
-                        loadUserAvatar();
-                        Toast.makeText(this, "Аватар обновлен", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +57,7 @@ public class lk extends AppCompatActivity {
         userPasswordTextView = findViewById(R.id.userPasswordTextView);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         settingsButton = findViewById(R.id.settingsButton);
+        instructionButton = findViewById(R.id.instructionButton);  // Инициализируем кнопку для перехода
 
         loadUserData();
         loadUserAvatar();
@@ -84,7 +69,13 @@ public class lk extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Добавим кнопку для отображения/скрытия пароля
+        // Добавим кнопку для перехода на инструкцию
+        instructionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(lk.this, Instruction.class);  // Перенаправляем на инструкцию
+            startActivity(intent);
+        });
+
+        // Логика для отображения/скрытия пароля
         Button togglePasswordVisibilityButton = findViewById(R.id.togglePasswordVisibilityButton);
         togglePasswordVisibilityButton.setOnClickListener(v -> {
             if (isPasswordVisible) {
@@ -102,8 +93,6 @@ public class lk extends AppCompatActivity {
             // Устанавливаем курсор в конец текста
             userPasswordTextView.setSelection(userPasswordTextView.getText().length());
         });
-
-
     }
 
     private void setupBottomNavigation() {

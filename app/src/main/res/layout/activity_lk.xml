@@ -85,7 +85,7 @@
           android:layout_height="wrap_content"
           android:layout_alignParentEnd="true"
           android:layout_centerVertical="true"
-          android:layout_marginEnd="16dp"
+          android:layout_marginEnd="30dp"
           android:padding="10dp"
           android:text="Показать пароль"
           android:textColor="@android:color/white"
@@ -109,6 +109,19 @@
           android:src="@drawable/ic_settings"
           app:backgroundTint="@color/fox_orange"
           app:tint="@android:color/white"/>
+
+      <!-- Кнопка инструкции, расположенная справа от кнопки настроек -->
+      <com.google.android.material.floatingactionbutton.FloatingActionButton
+          android:id="@+id/instructionButton"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentEnd="true"
+          android:layout_centerVertical="true"
+          android:layout_marginEnd="0dp"
+          android:layout_marginTop="26dp"
+          android:src="@android:drawable/ic_dialog_info"
+      app:backgroundTint="@color/fox_orange"
+      app:tint="@android:color/white"/>
 
     </LinearLayout>
 

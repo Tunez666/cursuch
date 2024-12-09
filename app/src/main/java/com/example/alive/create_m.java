@@ -12,20 +12,20 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class create_m extends AppCompatActivity {
@@ -113,7 +113,7 @@ public class create_m extends AppCompatActivity {
                 textView.setTextColor(Color.BLACK);
                 textView.setTextSize(16f);
                 textView.setPadding(16, 16, 16, 16);
-                view.setBackgroundResource(R.drawable.fox_edit_text_background);  // Фон как у других полей
+                view.setBackgroundResource(R.drawable.fox_edit_text_background);
 
                 return view;
             }
@@ -134,6 +134,22 @@ public class create_m extends AppCompatActivity {
 
         // Устанавливаем адаптер для Spinner
         friendsSpinner.setAdapter(adapter);
+
+        // Обработчик выбора друга
+        friendsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if (position >= 0 && position < allFriendIds.size()) {
+                    selectedFriendIds.clear();
+                    selectedFriendIds.add(allFriendIds.get(position));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Действие при отсутствии выбора (по умолчанию ничего не добавляем)
+            }
+        });
     }
 
     private long convertToTimestamp(String date, String time) {
@@ -226,7 +242,6 @@ public class create_m extends AppCompatActivity {
 
         if (currentUserId == -1) return false;
 
-        // Проверяем, что выбраны категория и событие
         if (selectedCategoryId == -1 || selectedEventId == -1) {
             Log.e(TAG, "Ошибка: не выбраны категория или событие");
             Toast.makeText(this, "Пожалуйста, выберите категорию и событие", Toast.LENGTH_SHORT).show();
@@ -241,8 +256,8 @@ public class create_m extends AppCompatActivity {
         values.put(DatabaseHelper.COLUMN_PLACE, place);
         values.put(DatabaseHelper.COLUMN_DESC, description);
         values.put(DatabaseHelper.COLUMN_USER_ID, currentUserId);
-        values.put(DatabaseHelper.COLUMN_ID_C, selectedCategoryId);  // Убедитесь, что передается ID категории
-        values.put(DatabaseHelper.COLUMN_ID_E, selectedEventId);  // Убедитесь, что передается ID события
+        values.put(DatabaseHelper.COLUMN_ID_C, selectedCategoryId);
+        values.put(DatabaseHelper.COLUMN_ID_E, selectedEventId);
 
         long meetingId = database.insert(DatabaseHelper.TABLE_MEET, null, values);
         if (meetingId != -1) {
@@ -258,5 +273,3 @@ public class create_m extends AppCompatActivity {
         super.onDestroy();
     }
 }
-
-

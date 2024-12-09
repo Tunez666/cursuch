@@ -429,6 +429,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
+    public void updateEmail(long userId, String newEmail) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EMAIL, newEmail); // Указываем правильный столбец
+        int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
+        Log.d(TAG, "Обновлен email для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
+    }
     public void updateUsername(long userId, String newUsername) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -444,15 +451,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
         Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
     }
-
-    public void updateEmail(long userId, String newEmail) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_EMAIL, newEmail); // Указываем правильный столбец
-        int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
-        Log.d(TAG, "Обновлен email для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
-    }
-
 
     public Cursor getMeetingsForUser(long userId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -494,7 +492,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null && cursor.moveToFirst()) {
             password = cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD));
         }
-
 
         cursor.close();
         db.close();
