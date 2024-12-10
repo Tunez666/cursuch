@@ -79,17 +79,18 @@
           android:inputType="textPassword"/>
 
       <!-- Кнопка для показа/скрытия пароля -->
+
       <Button
           android:id="@+id/togglePasswordVisibilityButton"
-          android:layout_width="wrap_content"
+          android:layout_width="159dp"
           android:layout_height="wrap_content"
           android:layout_alignParentEnd="true"
           android:layout_centerVertical="true"
-          android:layout_marginEnd="30dp"
+          android:layout_marginEnd="0dp"
+          android:backgroundTint="@color/fox_orange"
           android:padding="10dp"
           android:text="Показать пароль"
-          android:textColor="@android:color/white"
-          android:backgroundTint="@color/fox_orange" />
+          android:textColor="@android:color/white" />
 
       <View
           android:layout_width="match_parent"
@@ -106,6 +107,7 @@
           android:layout_height="wrap_content"
           android:layout_centerHorizontal="true"
           android:layout_marginTop="24dp"
+          android:layout_marginEnd="150dp"
           android:src="@drawable/ic_settings"
           app:backgroundTint="@color/fox_orange"
           app:tint="@android:color/white"/>
@@ -117,7 +119,7 @@
           android:layout_height="wrap_content"
           android:layout_alignParentEnd="true"
           android:layout_centerVertical="true"
-          android:layout_marginEnd="0dp"
+          android:layout_marginEnd="150dp"
           android:layout_marginTop="26dp"
           android:src="@android:drawable/ic_dialog_info"
       app:backgroundTint="@color/fox_orange"

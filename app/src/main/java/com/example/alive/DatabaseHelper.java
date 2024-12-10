@@ -492,7 +492,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void clearMeetings(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_MEET, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+        db.beginTransaction();
+        try {
+            // Удаляем встречи, созданные пользователем
+            int deletedMeetings = db.delete(TABLE_MEET, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+            Log.d(TAG, "Удалено встреч: " + deletedMeetings);
+
+            // Получаем ID встреч, в которых пользователь участвует
+            String selectQuery = "SELECT " + COLUMN_MEET_ID + " FROM " + TABLE_MEET_PARTICIPANTS +
+                    " WHERE " + COLUMN_PARTICIPANT_ID + " = ?";
+            Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(userId)});
+
+            // Удаляем участие пользователя во встречах
+            int deletedParticipations = db.delete(TABLE_MEET_PARTICIPANTS, COLUMN_PARTICIPANT_ID + " = ?", new String[]{String.valueOf(userId)});
+            Log.d(TAG, "Удалено участий: " + deletedParticipations);
+
+            // Удаляем встречи, которые остались без участников
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    @SuppressLint("Range") long meetId = cursor.getLong(cursor.getColumnIndex(COLUMN_MEET_ID));
+                    String checkParticipantsQuery = "SELECT COUNT(*) FROM " + TABLE_MEET_PARTICIPANTS +
+                            " WHERE " + COLUMN_MEET_ID + " = ?";
+                    Cursor participantsCursor = db.rawQuery(checkParticipantsQuery, new String[]{String.valueOf(meetId)});
+                    if (participantsCursor != null && participantsCursor.moveToFirst()) {
+                        int count = participantsCursor.getInt(0);
+                        if (count == 0) {
+                            db.delete(TABLE_MEET, COLUMN_ID_M + " = ?", new String[]{String.valueOf(meetId)});
+                            Log.d(TAG, "Удалена встреча без участников: " + meetId);
+                        }
+                        participantsCursor.close();
+                    }
+                } while (cursor.moveToNext());
+            }
+            if (cursor != null) {
+                cursor.close();
+            }
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при очистке встреч: " + e.getMessage());
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @SuppressLint("Range")
