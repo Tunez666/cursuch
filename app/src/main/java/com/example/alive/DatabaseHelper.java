@@ -150,7 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 8) {
             initializeCategories(db);
             initializeEvents(db);
-            Log.i(TAG, "Категории и события усп��шно добавлены");
+            Log.i(TAG, "Категории и события успешно добавлены");
         }
         if (oldVersion < 9) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET);
@@ -471,7 +471,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PASSWORD, newPassword);
         int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
-        Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто стро��: " + rowsAffected);
+        Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
     }
 
     public Cursor getMeetingsForUser(long userId) {

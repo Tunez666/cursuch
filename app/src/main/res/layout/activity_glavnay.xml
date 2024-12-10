@@ -10,11 +10,11 @@
     <LinearLayout
         android:id="@+id/centerContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_centerInParent="true"
         android:gravity="center_horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:layout_above="@id/bottom_navigation">
 
         <ImageView
             android:id="@+id/logoImageView"
@@ -49,6 +49,13 @@
             android:layout_height="1dp"
             android:background="@color/fox_light_orange"
             android:alpha="0.5"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ListView для отображения встреч -->
+        <ListView
+            android:id="@+id/meetingsListView"
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
             android:layout_marginBottom="16dp" />
 
         <!-- Кнопка: Создать встречу -->
