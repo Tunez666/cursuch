@@ -5,9 +5,11 @@ import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -27,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import android.Manifest;
+
 
 public class create_m extends AppCompatActivity {
 
@@ -92,6 +98,9 @@ public class create_m extends AppCompatActivity {
                 }
             }
         });
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_CALENDAR}, 100);
+        }
 
         setupBottomNavigation();
     }
@@ -265,10 +274,34 @@ public class create_m extends AppCompatActivity {
         long meetingId = database.insert(DatabaseHelper.TABLE_MEET, null, values);
         if (meetingId != -1) {
             dbHelper.addMeetParticipants(meetingId, selectedFriendIds);
+            // Добавление события в календарь
+            addEventToCalendar(name, date, time, place, description);
             return true;
         }
         return false;
     }
+
+    private void addEventToCalendar(String title, String date, String time, String location, String description) {
+        try {
+            long startMillis = convertToTimestamp(date, time) * 1000; // Перевод в миллисекунды
+            long endMillis = startMillis + (60 * 60 * 1000); // Допустим, продолжительность встречи — 1 час
+
+            ContentValues eventValues = new ContentValues();
+            eventValues.put(CalendarContract.Events.CALENDAR_ID, 1); // ID календаря (обычно 1 для основного)
+            eventValues.put(CalendarContract.Events.TITLE, title);
+            eventValues.put(CalendarContract.Events.DESCRIPTION, description);
+            eventValues.put(CalendarContract.Events.EVENT_LOCATION, location);
+            eventValues.put(CalendarContract.Events.DTSTART, startMillis);
+            eventValues.put(CalendarContract.Events.DTEND, endMillis);
+            eventValues.put(CalendarContract.Events.EVENT_TIMEZONE, "UTC");
+
+            getContentResolver().insert(CalendarContract.Events.CONTENT_URI, eventValues);
+            Log.d(TAG, "Событие успешно добавлено в календарь");
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при добавлении события в календарь", e);
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
