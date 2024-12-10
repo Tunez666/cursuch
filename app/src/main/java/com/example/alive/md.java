@@ -31,6 +31,7 @@ public class md extends AppCompatActivity {
     private ListView meetingsListView;
     private Button clearMeetingsButton;
     private BottomNavigationView bottomNavigationView;
+    private ListView participatingMeetingsListView; // Added new variable
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,8 @@ public class md extends AppCompatActivity {
         setContentView(R.layout.activity_md);
 
         meetingsListView = findViewById(R.id.meetingsListView);
+        participatingMeetingsListView = findViewById(R.id.participatingMeetingsListView); // Added line to find the second ListView
+
         clearMeetingsButton = findViewById(R.id.clearMeetingsButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -71,11 +74,12 @@ public class md extends AppCompatActivity {
     }
 
     private void displayUserMeetings(long userId) {
-        Log.d(TAG, "Попытка отобразить встречи для пользователя с ID: " + userId); // Added log
-        Cursor cursor = dbHelper.getMeetingsForUser(userId);
-        List<String> meetingsList = new ArrayList<>();
+        Log.d(TAG, "Попытка отобразить встречи для пользователя с ID: " + userId);
+        Cursor cursor = dbHelper.getAllUserMeetings(userId);
+        List<String> createdMeetingsList = new ArrayList<>();
+        List<String> participatingMeetingsList = new ArrayList<>();
 
-        Log.d(TAG, "Количество найденных встреч: " + (cursor != null ? cursor.getCount() : 0)); // Added log
+        Log.d(TAG, "Количество найденных встреч: " + (cursor != null ? cursor.getCount() : 0));
 
         if (cursor != null && cursor.getCount() > 0) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
@@ -85,19 +89,30 @@ public class md extends AppCompatActivity {
                 long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DATE));
                 String dateTime = dateFormat.format(new Date(timestamp * 1000));
                 String place = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLACE));
+                long meetingCreatorId = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USER_ID));
 
-                Log.d(TAG, "Встреча: " + name + " - " + dateTime); // Added log
+                String meetingInfo = name + " - " + dateTime + " at " + place;
 
-                meetingsList.add(name + " - " + dateTime + " at " + place);
+                if (meetingCreatorId == userId) {
+                    createdMeetingsList.add(meetingInfo);
+                } else {
+                    participatingMeetingsList.add(meetingInfo);
+                }
+
+                Log.d(TAG, "Встреча: " + meetingInfo);
             }
             cursor.close();
         }
 
-        if (meetingsList.isEmpty()) {
-            meetingsList.add("У вас пока нет созданных встреч.");
+        if (createdMeetingsList.isEmpty()) {
+            createdMeetingsList.add("У вас пока нет созданных встреч.");
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, meetingsList) {
+        if (participatingMeetingsList.isEmpty()) {
+            participatingMeetingsList.add("Вы пока не участвуете ни в одной встрече.");
+        }
+
+        ArrayAdapter<String> createdAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, createdMeetingsList) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -106,7 +121,19 @@ public class md extends AppCompatActivity {
                 return view;
             }
         };
-        meetingsListView.setAdapter(adapter);
+
+        ArrayAdapter<String> participatingAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, participatingMeetingsList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                textView.setTextColor(Color.BLACK);
+                return view;
+            }
+        };
+
+        meetingsListView.setAdapter(createdAdapter);
+        participatingMeetingsListView.setAdapter(participatingAdapter);
     }
 
 

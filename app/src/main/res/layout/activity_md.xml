@@ -34,14 +34,39 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Созданные встречи"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"/>
+
                 <ListView
                     android:id="@+id/meetingsListView"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
+                    android:layout_height="200dp"
                     android:divider="@android:color/darker_gray"
                     android:dividerHeight="1dp"
-                    android:background="@android:color/white"
-                    android:textColor="#000000"/>
+                    android:background="@android:color/white"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Встречи, в которых вы участвуете"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <ListView
+                    android:id="@+id/participatingMeetingsListView"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:divider="@android:color/darker_gray"
+                    android:dividerHeight="1dp"
+                    android:background="@android:color/white"/>
 
             </LinearLayout>
 

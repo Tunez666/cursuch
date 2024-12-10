@@ -150,7 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 8) {
             initializeCategories(db);
             initializeEvents(db);
-            Log.i(TAG, "Категории и события успешно добавлены");
+            Log.i(TAG, "Категории и события усп��шно добавлены");
         }
         if (oldVersion < 9) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEET);
@@ -330,29 +330,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Метод для добавления друга
     public void addFriend(long userId, long friendId) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        // Проверка на уникальность
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_FRIENDS +
-                        " WHERE (" + COLUMN_USER_ID_FRIENDS + " = ? AND " + COLUMN_FRIEND_ID + " = ?) " +
-                        "OR (" + COLUMN_USER_ID_FRIENDS + " = ? AND " + COLUMN_FRIEND_ID + " = ?)",
-                new String[]{String.valueOf(userId), String.valueOf(friendId),
-                        String.valueOf(friendId), String.valueOf(userId)});
-        if (cursor.getCount() > 0) {
-            Log.e(TAG, "Такая связь уже существует");
+        db.beginTransaction();
+        try {
+            // Проверка на уникальность
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_FRIENDS +
+                            " WHERE (" + COLUMN_USER_ID_FRIENDS + " = ? AND " + COLUMN_FRIEND_ID + " = ?) " +
+                            "OR (" + COLUMN_USER_ID_FRIENDS + " = ? AND " + COLUMN_FRIEND_ID + " = ?)",
+                    new String[]{String.valueOf(userId), String.valueOf(friendId),
+                            String.valueOf(friendId), String.valueOf(userId)});
+            if (cursor.getCount() > 0) {
+                Log.e(TAG, "Такая связь уже существует");
+                cursor.close();
+                return;
+            }
             cursor.close();
-            return;
-        }
-        cursor.close();
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USER_ID_FRIENDS, userId);
-        values.put(COLUMN_FRIEND_ID, friendId);
-        long result = db.insert(TABLE_FRIENDS, null, values);
+            // Добавляем связь в обе стороны
+            ContentValues values1 = new ContentValues();
+            values1.put(COLUMN_USER_ID_FRIENDS, userId);
+            values1.put(COLUMN_FRIEND_ID, friendId);
+            long result1 = db.insert(TABLE_FRIENDS, null, values1);
 
-        if (result == -1) {
-            Log.e(TAG, "Не удалось добавить друга");
-        } else {
-            Log.i(TAG, "Друг успешно добавлен");
+            ContentValues values2 = new ContentValues();
+            values2.put(COLUMN_USER_ID_FRIENDS, friendId);
+            values2.put(COLUMN_FRIEND_ID, userId);
+            long result2 = db.insert(TABLE_FRIENDS, null, values2);
+
+            if (result1 == -1 || result2 == -1) {
+                Log.e(TAG, "Не удалось добавить друга");
+            } else {
+                Log.i(TAG, "Друг успешно добавлен");
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
     @SuppressLint("Range")
@@ -395,10 +406,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<String> getFriends(long userId) {
         List<String> friendNames = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT u." + COLUMN_USERNAME + " FROM " + TABLE_FRIENDS + " f " +
-                "JOIN " + TABLE_USERS + " u ON f." + COLUMN_FRIEND_ID + " = u." + COLUMN_ID +
-                " WHERE f." + COLUMN_USER_ID_FRIENDS + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+        String query = "SELECT u." + COLUMN_USERNAME + " FROM " + TABLE_USERS + " u " +
+                "INNER JOIN " + TABLE_FRIENDS + " f ON u." + COLUMN_ID + " = f." + COLUMN_FRIEND_ID +
+                " WHERE f." + COLUMN_USER_ID_FRIENDS + " = ? " +
+                "UNION " +
+                "SELECT u." + COLUMN_USERNAME + " FROM " + TABLE_USERS + " u " +
+                "INNER JOIN " + TABLE_FRIENDS + " f ON u." + COLUMN_ID + " = f." + COLUMN_USER_ID_FRIENDS +
+                " WHERE f." + COLUMN_FRIEND_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(userId)});
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 friendNames.add(cursor.getString(0));
@@ -410,14 +425,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void clearFriends(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        // Удаляем все записи из таблицы друзей для конкретного пользователя
-        int rowsDeleted = db.delete(TABLE_FRIENDS, COLUMN_USER_ID_FRIENDS + " = ? OR " + COLUMN_FRIEND_ID + " = ?",
-                new String[]{String.valueOf(userId), String.valueOf(userId)});
+        db.beginTransaction();
+        try {
+            // Удаляем все записи из таблицы друзей для конкретного пользователя
+            int rowsDeleted = db.delete(TABLE_FRIENDS,
+                    COLUMN_USER_ID_FRIENDS + " = ? OR " + COLUMN_FRIEND_ID + " = ?",
+                    new String[]{String.valueOf(userId), String.valueOf(userId)});
 
-        if (rowsDeleted > 0) {
-            Log.i(TAG, "Список друзей успешно очищен");
-        } else {
-            Log.e(TAG, "Не удалось очистить список друзей");
+            if (rowsDeleted > 0) {
+                Log.i(TAG, "Список друзей успешно очищен");
+            } else {
+                Log.e(TAG, "Не удалось очистить список друзей");
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -449,7 +471,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PASSWORD, newPassword);
         int rowsAffected = db.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
-        Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто строк: " + rowsAffected);
+        Log.d(TAG, "Обновлен пароль для пользователя с ID " + userId + ". Затронуто стро��: " + rowsAffected);
     }
 
     public Cursor getMeetingsForUser(long userId) {
@@ -457,6 +479,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_MEET + " WHERE " + COLUMN_USER_ID + " = ? OR " + COLUMN_USER_ID + " IS NULL OR " + COLUMN_USER_ID + " = 0 ORDER BY " + COLUMN_DATE + " DESC";
         return db.rawQuery(query, new String[]{String.valueOf(userId)});
     }
+
+    public Cursor getAllUserMeetings(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT m.* FROM " + TABLE_MEET + " m " +
+                "LEFT JOIN " + TABLE_MEET_PARTICIPANTS + " mp ON m." + COLUMN_ID_M + " = mp." + COLUMN_MEET_ID +
+                " WHERE m." + COLUMN_USER_ID + " = ? OR mp." + COLUMN_PARTICIPANT_ID + " = ? " +
+                "ORDER BY m." + COLUMN_DATE + " DESC";
+        return db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(userId)});
+    }
+
     public void clearMeetings(long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEET, COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
