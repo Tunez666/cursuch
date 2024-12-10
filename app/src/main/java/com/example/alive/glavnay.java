@@ -44,7 +44,7 @@ public class glavnay extends AppCompatActivity {
         });
 
         // Отображение ближайших встреч
-
+        displayNearestMeetings();
     }
 
     private void setupBottomNavigation() {
@@ -70,11 +70,42 @@ public class glavnay extends AppCompatActivity {
         });
     }
 
+    private void displayNearestMeetings() {
+        SharedPreferences preferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        long userId = preferences.getLong("userId", -1);
 
+        if (userId != -1) {
+            List<DatabaseHelper.Meeting> nearestMeetings = dbHelper.getNearestMeetingsForCurrentWeek(userId);
+            List<String> meetingStrings = new ArrayList<>();
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+
+            for (DatabaseHelper.Meeting meeting : nearestMeetings) {
+                String dateString = dateFormat.format(new Date(meeting.date * 1000));
+                meetingStrings.add(meeting.name + " - " + dateString + " at " + meeting.place);
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, meetingStrings) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View view = super.getView(position, convertView, parent);
+                    TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                    textView.setTextColor(Color.BLACK);
+                    return view;
+                }
+            };
+            meetingsListView.setAdapter(adapter);
+
+            // Обновляем текст подзаголовка
+            TextView subTitle = findViewById(R.id.sub);
+            subTitle.setText("Ближайшие встречи (" + meetingStrings.size() + ")");
+        }
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        displayNearestMeetings();
     }
 }
 

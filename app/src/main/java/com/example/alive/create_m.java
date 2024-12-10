@@ -135,19 +135,22 @@ public class create_m extends AppCompatActivity {
         // Устанавливаем адаптер для Spinner
         friendsSpinner.setAdapter(adapter);
 
-        // Обработчик выбора друга
+        // Обработчик выбора друзей
         friendsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (position >= 0 && position < allFriendIds.size()) {
-                    selectedFriendIds.clear();
-                    selectedFriendIds.add(allFriendIds.get(position));
+                    long selectedFriendId = allFriendIds.get(position);
+                    if (!selectedFriendIds.contains(selectedFriendId)) {
+                        selectedFriendIds.add(selectedFriendId);
+                        Toast.makeText(create_m.this, "Друг добавлен: " + friendNames.get(position), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
-                // Действие при отсутствии выбора (по умолчанию ничего не добавляем)
+                // Ничего не делаем
             }
         });
     }
@@ -273,3 +276,4 @@ public class create_m extends AppCompatActivity {
         super.onDestroy();
     }
 }
+

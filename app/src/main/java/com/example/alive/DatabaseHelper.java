@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -530,6 +531,67 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return password;
     }
+
+    // Add this method to the DatabaseHelper class
+    public List<Meeting> getNearestMeetingsForCurrentWeek(long userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<Meeting> meetings = new ArrayList<>();
+
+        // Get the start and end of the current week
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        long startOfWeek = calendar.getTimeInMillis() / 1000;
+        calendar.add(Calendar.DAY_OF_WEEK, 6);
+        long endOfWeek = calendar.getTimeInMillis() / 1000;
+
+        String query = "SELECT m.* FROM " + TABLE_MEET + " m " +
+                "LEFT JOIN " + TABLE_MEET_PARTICIPANTS + " mp ON m." + COLUMN_ID_M + " = mp." + COLUMN_MEET_ID +
+                " WHERE (m." + COLUMN_USER_ID + " = ? OR mp." + COLUMN_PARTICIPANT_ID + " = ?) " +
+                "AND m." + COLUMN_DATE + " BETWEEN ? AND ? " +
+                "ORDER BY m." + COLUMN_DATE + " ASC LIMIT 3";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                String.valueOf(userId),
+                String.valueOf(userId),
+                String.valueOf(startOfWeek),
+                String.valueOf(endOfWeek)
+        });
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") Meeting meeting = new Meeting(
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_ID_M)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_NAME)),
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_TIME)),
+                        cursor.getString(cursor.getColumnIndex(COLUMN_PLACE))
+                );
+                meetings.add(meeting);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return meetings;
+    }
+
+    // Add this inner class to the DatabaseHelper class
+    public static class Meeting {
+        public long id;
+        public String name;
+        public long date;
+        public String time;
+        public String place;
+
+        public Meeting(long id, String name, long date, String time, String place) {
+            this.id = id;
+            this.name = name;
+            this.date = date;
+            this.time = time;
+            this.place = place;
+        }
+    }
+
+
 
 
 }
