@@ -4,10 +4,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
-from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 
 def hello():
-    # Регистрация шрифтов с оригинальными именами файлов
+    # Регистрация шрифтов
     pdfmetrics.registerFont(TTFont('Bold', os.path.join('fonts', 'PT-Astra-Serif_Bold.ttf')))
     pdfmetrics.registerFont(TTFont('Regular', os.path.join('fonts', 'PT-Astra-Serif_Regular.ttf')))
 
@@ -17,23 +17,38 @@ def hello():
     # Создание стилей
     styles = getSampleStyleSheet()
     
-    # Создание пользовательского стиля с поддержкой русского языка
-    russian_style = ParagraphStyle(
-        'RussianStyle',
+    # Создание пользовательского стиля с выравниванием по левому краю
+    russian_style_left = ParagraphStyle(
+        'RussianStyleLeft',
         parent=styles['Normal'],
-        fontName='Regular',  # Используем имя 'Regular', как зарегистрировано выше
+        fontName='Regular',
         fontSize=12,
+        alignment=TA_LEFT,
+    )
+
+    # Создание пользовательского стиля с жирным шрифтом и выравниванием по центру
+    russian_style_center_bold = ParagraphStyle(
+        'RussianStyleCenterBold',
+        parent=styles['Normal'],
+        fontName='Bold',
+        fontSize=14,
         alignment=TA_CENTER,
     )
 
     flowables = []
     
-    # Использование русского текста
-    text = "ИАТ - Институт Авиационных Технологий"
-    para = Paragraph(text, style=russian_style)
-    flowables.append(para)
+    # Добавление текста "ИАТ" по левому краю
+    text_iat = "ИАТ"
+    para_iat = Paragraph(text_iat, style=russian_style_left)
+    flowables.append(para_iat)
+
+    # Добавление текста "ЗАЯВЛЕНИЕ" по центру жирным шрифтом
+    text_zayavlenie = "ЗАЯВЛЕНИЕ"
+    para_zayavlenie = Paragraph(text_zayavlenie, style=russian_style_center_bold)
+    flowables.append(para_zayavlenie)
 
     doc.build(flowables)
 
 if __name__ == '__main__':
     hello()
+
