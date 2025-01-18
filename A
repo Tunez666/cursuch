@@ -1,0 +1,39 @@
+import os
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.enums import TA_CENTER
+
+def hello():
+    # Регистрация шрифтов с оригинальными именами файлов
+    pdfmetrics.registerFont(TTFont('Bold', os.path.join('fonts', 'PT-Astra-Serif_Bold.ttf')))
+    pdfmetrics.registerFont(TTFont('Regular', os.path.join('fonts', 'PT-Astra-Serif_Regular.ttf')))
+
+    # Создание документа
+    doc = SimpleDocTemplate("заявление.pdf", pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+
+    # Создание стилей
+    styles = getSampleStyleSheet()
+    
+    # Создание пользовательского стиля с поддержкой русского языка
+    russian_style = ParagraphStyle(
+        'RussianStyle',
+        parent=styles['Normal'],
+        fontName='Regular',  # Используем имя 'Regular', как зарегистрировано выше
+        fontSize=12,
+        alignment=TA_CENTER,
+    )
+
+    flowables = []
+    
+    # Использование русского текста
+    text = "ИАТ - Институт Авиационных Технологий"
+    para = Paragraph(text, style=russian_style)
+    flowables.append(para)
+
+    doc.build(flowables)
+
+if __name__ == '__main__':
+    hello()
